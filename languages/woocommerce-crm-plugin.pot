@@ -1,0 +1,50 @@
+msgid "Plugin Name"
+msgstr "WooCommerce CRM Plugin"
+
+msgid "Plugin Description"
+msgstr "A plugin that integrates HubSpot and Zoho CRM features for managing contacts, support, and orders."
+
+msgid "Contact Form"
+msgstr "Contact Form"
+
+msgid "Reseller Form"
+msgstr "Reseller Form"
+
+msgid "Dynamic Form"
+msgstr "Dynamic Form"
+
+msgid "Shipping Methods"
+msgstr "Shipping Methods"
+
+msgid "Shipping Rates"
+msgstr "Shipping Rates"
+
+msgid "Order Management"
+msgstr "Order Management"
+
+msgid "Order Tracking"
+msgstr "Order Tracking"
+
+msgid "Lead Capture"
+msgstr "Lead Capture"
+
+msgid "Social Media Integration"
+msgstr "Social Media Integration"
+
+msgid "TikTok Integration"
+msgstr "TikTok Integration"
+
+msgid "Facebook Integration"
+msgstr "Facebook Integration"
+
+msgid "Instagram Integration"
+msgstr "Instagram Integration"
+
+msgid "Customer Information"
+msgstr "Customer Information"
+
+msgid "User-Friendly Interface"
+msgstr "User-Friendly Interface"
+
+msgid "Compatibility with WooCommerce"
+msgstr "Compatibility with WooCommerce"
