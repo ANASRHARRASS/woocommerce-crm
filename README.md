@@ -27,13 +27,31 @@ Lightweight CRM integrated with WooCommerce — collects leads, syncs with third
 - templates/ — PHP templates for admin and public views
 - tests/ — PHPUnit tests (bootstrap, unit, integration)
 
-## Development
-1. Clone and set remote:
-   git clone https://github.com/ANASRHARRASS/woocommerce-crm.git
-2. Install dev deps:
-   composer install
-3. Run tests:
-   vendor/bin/phpunit --configuration phpunit.xml
+## Overview
+Lightweight CRM integrated with WooCommerce. Collects leads, syncs with HubSpot/Zoho, manages orders and shipping rates, provides REST endpoints and shortcodes.
+
+## Where to look (entry points)
+- Plugin bootstrap: woocommerce-crm-plugin.php
+- Core wiring: src/Core.php
+- Admin UI: src/Admin/
+- Public shortcodes/forms: src/Public/, templates/public/
+- Integrations: src/Integrations/
+- Includes: includes/rest-api.php, includes/ajax-handlers.php, includes/cron-jobs.php
+
+## Tested environments
+- WordPress: specify version (e.g. 6.x)
+- WooCommerce: specify version
+- PHP: specify version(s), e.g. 8.1
+
+## Development notes
+- Never commit API keys — use environment variables.
+- Tests: see tests/ and phpunit.xml
+
+## Tasks for AI/reviewer
+1. Security audit (DB writes, nonce, sanitization/escaping, capability checks).  
+2. Bug fixes and code style suggestions.  
+3. Add/verify unit & integration tests.  
+4. Performance and WP best-practices recommendations.
 
 ## Contributing
 - Use feature branches, open PRs to main
@@ -45,3 +63,4 @@ GPL-2.0-or-later (see LICENSE)
 
 ## Contact
 Author: ANASRHARRASS
+
