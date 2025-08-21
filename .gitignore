@@ -1,0 +1,16 @@
+# Node
+node_modules/
+# Composer / PHP
+vendor/
+composer.lock
+# WordPress / plugin
+wp-content/uploads/
+*.log
+.env
+*.sql
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+phpunit.xml
+/tests/_output/
