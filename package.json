@@ -1,0 +1,36 @@
+{
+  "name": "universal-lead-capture-plugin",
+  "version": "1.0.0",
+  "description": "A WordPress plugin for capturing leads and integrating with various platforms including HubSpot, Zoho, WooCommerce, and advertising services.",
+  "main": "universal-lead-capture-plugin.php",
+  "scripts": {
+    "build": "webpack --mode production",
+    "watch": "webpack --watch",
+    "test": "phpunit"
+  },
+  "dependencies": {
+    "jquery": "^3.6.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.0.0",
+    "webpack-cli": "^4.0.0",
+    "babel-loader": "^8.0.0",
+    "css-loader": "^5.0.0",
+    "style-loader": "^2.0.0"
+  },
+  "author": "Your Name",
+  "license": "GPL-2.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/universal-lead-capture-plugin.git"
+  },
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "lead capture",
+    "hubspot",
+    "zoho",
+    "woocommerce",
+    "ads"
+  ]
+}

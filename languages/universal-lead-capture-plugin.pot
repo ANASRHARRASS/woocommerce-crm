@@ -1,0 +1,254 @@
+msgid "Plugin Name"
+msgstr ""
+
+msgid "Description of the plugin."
+msgstr ""
+
+msgid "Version"
+msgstr ""
+
+msgid "Author"
+msgstr ""
+
+msgid "License"
+msgstr ""
+
+msgid "License URI"
+msgstr ""
+
+msgid "Text Domain"
+msgstr ""
+
+msgid "Domain Path"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Lead Capture"
+msgstr ""
+
+msgid "Integrations"
+msgstr ""
+
+msgid "WooCommerce Integration"
+msgstr ""
+
+msgid "HubSpot Integration"
+msgstr ""
+
+msgid "Zoho Integration"
+msgstr ""
+
+msgid "Google Ads Integration"
+msgstr ""
+
+msgid "Facebook Ads Integration"
+msgstr ""
+
+msgid "Dynamic Forms"
+msgstr ""
+
+msgid "Form Submission"
+msgstr ""
+
+msgid "Thank you for your submission!"
+msgstr ""
+
+msgid "Error occurred during submission."
+msgstr ""
+
+msgid "Please fill out all required fields."
+msgstr ""
+
+msgid "Select an option"
+msgstr ""
+
+msgid "Submit"
+msgstr ""
+
+msgid "Reset"
+msgstr ""
+
+msgid "Product"
+msgstr ""
+
+msgid "Shipment"
+msgstr ""
+
+msgid "Lead Source"
+msgstr ""
+
+msgid "Capture Leads"
+msgstr ""
+
+msgid "Organize Leads"
+msgstr ""
+
+msgid "Integration Settings"
+msgstr ""
+
+msgid "Enable Integration"
+msgstr ""
+
+msgid "API Key"
+msgstr ""
+
+msgid "API Secret"
+msgstr ""
+
+msgid "Webhook URL"
+msgstr ""
+
+msgid "Save Changes"
+msgstr ""
+
+msgid "Form Settings"
+msgstr ""
+
+msgid "Add New Field"
+msgstr ""
+
+msgid "Field Type"
+msgstr ""
+
+msgid "Field Label"
+msgstr ""
+
+msgid "Required"
+msgstr ""
+
+msgid "Options"
+msgstr ""
+
+msgid "Add Option"
+msgstr ""
+
+msgid "Remove Field"
+msgstr ""
+
+msgid "Form Preview"
+msgstr ""
+
+msgid "Preview your form here."
+msgstr ""
+
+msgid "Lead Management"
+msgstr ""
+
+msgid "View Leads"
+msgstr ""
+
+msgid "Export Leads"
+msgstr ""
+
+msgid "Import Leads"
+msgstr ""
+
+msgid "Lead Details"
+msgstr ""
+
+msgid "Edit Lead"
+msgstr ""
+
+msgid "Delete Lead"
+msgstr ""
+
+msgid "Are you sure you want to delete this lead?"
+msgstr ""
+
+msgid "No leads found."
+msgstr ""
+
+msgid "Search Leads"
+msgstr ""
+
+msgid "Filter by Source"
+msgstr ""
+
+msgid "Filter by Date"
+msgstr ""
+
+msgid "Lead Status"
+msgstr ""
+
+msgid "Active"
+msgstr ""
+
+msgid "Inactive"
+msgstr ""
+
+msgid "Pending"
+msgstr ""
+
+msgid "Lead Notes"
+msgstr ""
+
+msgid "Add Note"
+msgstr ""
+
+msgid "Note"
+msgstr ""
+
+msgid "Save Note"
+msgstr ""
+
+msgid "Delete Note"
+msgstr ""
+
+msgid "Are you sure you want to delete this note?"
+msgstr ""
+
+msgid "No notes found."
+msgstr ""
+
+msgid "Settings saved."
+msgstr ""
+
+msgid "Settings updated."
+msgstr ""
+
+msgid "Error saving settings."
+msgstr ""
+
+msgid "Form created successfully."
+msgstr ""
+
+msgid "Error creating form."
+msgstr ""
+
+msgid "Field added successfully."
+msgstr ""
+
+msgid "Error adding field."
+msgstr ""
+
+msgid "Field removed successfully."
+msgstr ""
+
+msgid "Error removing field."
+msgstr ""
+
+msgid "Lead captured successfully."
+msgstr ""
+
+msgid "Error capturing lead."
+msgstr ""
+
+msgid "Integration enabled."
+msgstr ""
+
+msgid "Integration disabled."
+msgstr ""
+
+msgid "API credentials saved."
+msgstr ""
+
+msgid "Error saving API credentials."
+msgstr ""
+
+msgid "Webhook URL saved."
+msgstr ""
+
+msgid "Error saving webhook URL."
+msgstr ""

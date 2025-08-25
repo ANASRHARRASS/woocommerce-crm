@@ -1,0 +1,41 @@
+/* 
+This file contains the CSS styles for the public-facing interface of the plugin. 
+You can add styles for forms, buttons, and other elements that will be displayed to users. 
+*/
+
+/* Example styles for the lead capture form */
+.lead-capture-form {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.lead-capture-form h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.lead-capture-form input[type="text"],
+.lead-capture-form input[type="email"],
+.lead-capture-form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.lead-capture-form button {
+    background-color: #0073aa;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.lead-capture-form button:hover {
+    background-color: #005177;
+}

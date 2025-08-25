@@ -1,0 +1,9 @@
+﻿# ignore machine/user noise
+.continue/
+OneDrive/
+AppData/
+node_modules/
+.vscode/
+*.log
+*.tmp
+*.lance
