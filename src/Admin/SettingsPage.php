@@ -27,6 +27,11 @@ class SettingsPage {
     }
 
     public function create_admin_page() {
+        // Check user capabilities
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( __( 'You do not have sufficient permissions to access this page.' ), 'Permission Error', array( 'response' => 403 ) );
+        }
+        
         ?>
         <div class="wrap">
             <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
@@ -89,17 +94,21 @@ class SettingsPage {
 
     public function hubspot_api_key_callback() {
         $options = get_option( 'woocommerce_crm_plugin_options' );
+        $value = isset( $options['hubspot_api_key'] ) ? $options['hubspot_api_key'] : '';
         printf(
-            '<input type="text" id="hubspot_api_key" name="woocommerce_crm_plugin_options[hubspot_api_key]" value="%s" />',
-            isset( $options['hubspot_api_key'] ) ? esc_attr( $options['hubspot_api_key']) : ''
+            '<input type="password" id="hubspot_api_key" name="woocommerce_crm_plugin_options[hubspot_api_key]" value="%s" class="regular-text" />',
+            esc_attr( $value )
         );
+        echo '<p class="description">Enter your HubSpot API key. This will be stored securely.</p>';
     }
 
     public function zoho_api_key_callback() {
         $options = get_option( 'woocommerce_crm_plugin_options' );
+        $value = isset( $options['zoho_api_key'] ) ? $options['zoho_api_key'] : '';
         printf(
-            '<input type="text" id="zoho_api_key" name="woocommerce_crm_plugin_options[zoho_api_key]" value="%s" />',
-            isset( $options['zoho_api_key'] ) ? esc_attr( $options['zoho_api_key']) : ''
+            '<input type="password" id="zoho_api_key" name="woocommerce_crm_plugin_options[zoho_api_key]" value="%s" class="regular-text" />',
+            esc_attr( $value )
         );
+        echo '<p class="description">Enter your Zoho API key. This will be stored securely.</p>';
     }
 }

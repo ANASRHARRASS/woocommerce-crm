@@ -24,8 +24,7 @@ add_action( 'plugins_loaded', 'wcp_init' );
 
 function wcp_init() {
     // Load the core class
-    $core = new WCP\Core();
-    $core->init();
+    $core = \WooCommerceCRMPlugin\Core::get_instance();
 }
 
 // Activation and deactivation hooks

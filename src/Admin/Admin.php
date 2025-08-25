@@ -21,6 +21,11 @@ class Admin {
     }
 
     public function renderAdminPage() {
+        // Check user capabilities
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( __( 'You do not have sufficient permissions to access this page.' ), 'Permission Error', array( 'response' => 403 ) );
+        }
+        
         // Include the settings page template
         include_once plugin_dir_path(__FILE__) . 'SettingsPage.php';
     }

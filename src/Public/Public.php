@@ -2,7 +2,7 @@
 
 namespace WooCommerceCRMPlugin\Public;
 
-class Public {
+class PublicController {
     public function __construct() {
         add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
         add_shortcode('crm_contact_form', [$this, 'render_contact_form']);
