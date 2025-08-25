@@ -1,5 +1,5 @@
 {
-    "name": "woocommerce-crm-plugin",
+    "name": "anasrharrass/woocommerce-crm-plugin",
     "description": "A WordPress plugin that integrates WooCommerce with HubSpot and Zoho CRM, providing dynamic forms, order management, and lead capture from social media.",
     "type": "wordpress-plugin",
     "require": {
@@ -18,5 +18,8 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "require-dev": {
+        "phpunit/phpunit": "^9.0"
+    }
 }
