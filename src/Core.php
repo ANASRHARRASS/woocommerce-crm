@@ -42,14 +42,46 @@ class Core {
     }
 
     public function enqueue_scripts() {
-        // Enqueue public scripts and styles
-        wp_enqueue_style( 'woocommerce-crm-plugin-public', plugin_dir_url( __FILE__ ) . '../assets/css/public.css' );
-        wp_enqueue_script( 'woocommerce-crm-plugin-public', plugin_dir_url( __FILE__ ) . '../assets/js/public.js', [ 'jquery' ], null, true );
+        // Enqueue public scripts and styles with version numbers
+        $version = defined( 'WP_DEBUG' ) && WP_DEBUG ? time() : '1.0.0';
+        
+        wp_enqueue_style( 
+            'woocommerce-crm-plugin-public', 
+            plugin_dir_url( __FILE__ ) . '../assets/css/public.css',
+            array(),
+            $version
+        );
+        wp_enqueue_script( 
+            'woocommerce-crm-plugin-public', 
+            plugin_dir_url( __FILE__ ) . '../assets/js/public.js', 
+            array( 'jquery' ), 
+            $version, 
+            true 
+        );
     }
 
     public function enqueue_admin_scripts() {
-        // Enqueue admin scripts and styles
-        wp_enqueue_style( 'woocommerce-crm-plugin-admin', plugin_dir_url( __FILE__ ) . '../assets/css/admin.css' );
-        wp_enqueue_script( 'woocommerce-crm-plugin-admin', plugin_dir_url( __FILE__ ) . '../assets/js/admin.js', [ 'jquery' ], null, true );
+        // Enqueue admin scripts and styles with version numbers
+        $version = defined( 'WP_DEBUG' ) && WP_DEBUG ? time() : '1.0.0';
+        
+        wp_enqueue_style( 
+            'woocommerce-crm-plugin-admin', 
+            plugin_dir_url( __FILE__ ) . '../assets/css/admin.css',
+            array(),
+            $version
+        );
+        wp_enqueue_script( 
+            'woocommerce-crm-plugin-admin', 
+            plugin_dir_url( __FILE__ ) . '../assets/js/admin.js', 
+            array( 'jquery' ), 
+            $version, 
+            true 
+        );
+        
+        // Localize script for AJAX with nonce
+        wp_localize_script( 'woocommerce-crm-plugin-admin', 'wcp_ajax', array(
+            'ajax_url' => admin_url( 'admin-ajax.php' ),
+            'nonce' => wp_create_nonce( 'wcp_admin_nonce' ),
+        ) );
     }
 }
