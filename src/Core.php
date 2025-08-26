@@ -1,55 +1,75 @@
 <?php
 
-namespace WooCommerceCRMPlugin;
+namespace WCP;
+
+use WCP\Leads\LeadManager;
+use WCP\Integrations\HubSpotIntegration;
+use WCP\Integrations\ZohoIntegration;
+use WCP\Integrations\GoogleDriveIntegration;
+use WCP\Integrations\WhatsAppIntegration;
+use WCP\WooCommerce\OrderSync;
+use WCP\Social\SocialLeadIngestor;
+
+defined( 'ABSPATH' ) || exit;
 
 class Core {
-    protected static $instance = null;
 
-    public static function get_instance() {
-        if ( is_null( self::$instance ) ) {
-            self::$instance = new self();
-            self::$instance->init();
+    const VERSION = '1.0.0';
+
+    protected LeadManager $leads;
+    protected array $integrations = [];
+
+    public function init(): void {
+        $this->register_hooks();
+        $this->boot_services();
+        do_action( 'wcp_after_init', $this );
+    }
+
+    protected function register_hooks(): void {
+        add_action( 'init', [ $this, 'maybe_upgrade' ] );
+    }
+
+    protected function boot_services(): void {
+        $this->leads = new LeadManager();
+        $this->load_integrations();
+        $this->load_woocommerce();
+        $this->load_social_ingestor();
+    }
+
+    protected function load_integrations(): void {
+        $instances = [
+            new HubSpotIntegration(),
+            new ZohoIntegration(),
+            new GoogleDriveIntegration(),
+            new WhatsAppIntegration(),
+        ];
+        foreach ( $instances as $integration ) {
+            if ( $integration->is_enabled() ) {
+                $this->integrations[ $integration->get_name() ] = $integration;
+            }
         }
-        return self::$instance;
+        $this->leads->set_integrations( $this->integrations );
     }
 
-    private function init() {
-        $this->load_dependencies();
-        $this->set_hooks();
+    protected function load_woocommerce(): void {
+        if ( class_exists( 'WooCommerce' ) ) {
+            new OrderSync( $this->leads );
+        }
     }
 
-    private function load_dependencies() {
-        // Load necessary files and classes
-        require_once plugin_dir_path( __FILE__ ) . 'Admin/Admin.php';
-        require_once plugin_dir_path( __FILE__ ) . 'Public/Public.php';
-        require_once plugin_dir_path( __FILE__ ) . 'Integrations/HubSpot/HubSpotClient.php';
-        require_once plugin_dir_path( __FILE__ ) . 'Integrations/Zoho/ZohoClient.php';
-        require_once plugin_dir_path( __FILE__ ) . 'Forms/DynamicForm.php';
-        require_once plugin_dir_path( __FILE__ ) . 'Shipping/ShippingManager.php';
-        require_once plugin_dir_path( __FILE__ ) . 'Orders/OrderManager.php';
-        require_once plugin_dir_path( __FILE__ ) . 'Utils/Logger.php';
+    protected function load_social_ingestor(): void {
+        new SocialLeadIngestor( $this->leads );
     }
 
-    private function set_hooks() {
-        // Set up hooks for actions and filters
-        add_action( 'init', [ $this, 'register_custom_post_types' ] );
-        add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
-        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
+    public function maybe_upgrade(): void {
+        $stored = get_option( 'wcp_version' );
+        if ( $stored && version_compare( $stored, self::VERSION, '<' ) ) {
+            // Future upgrade routines.
+            update_option( 'wcp_version', self::VERSION );
+        }
     }
 
-    public function register_custom_post_types() {
-        // Register custom post types if needed
-    }
-
-    public function enqueue_scripts() {
-        // Enqueue public scripts and styles
-        wp_enqueue_style( 'woocommerce-crm-plugin-public', plugin_dir_url( __FILE__ ) . '../assets/css/public.css' );
-        wp_enqueue_script( 'woocommerce-crm-plugin-public', plugin_dir_url( __FILE__ ) . '../assets/js/public.js', [ 'jquery' ], null, true );
-    }
-
-    public function enqueue_admin_scripts() {
-        // Enqueue admin scripts and styles
-        wp_enqueue_style( 'woocommerce-crm-plugin-admin', plugin_dir_url( __FILE__ ) . '../assets/css/admin.css' );
-        wp_enqueue_script( 'woocommerce-crm-plugin-admin', plugin_dir_url( __FILE__ ) . '../assets/js/admin.js', [ 'jquery' ], null, true );
+    public function get_lead_manager(): LeadManager {
+        return $this->leads;
     }
 }

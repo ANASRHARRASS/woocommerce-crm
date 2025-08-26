@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WooCommerce CRM Plugin
- * Description: A plugin that integrates HubSpot and Zoho CRM features for WooCommerce, including dynamic forms, order management, and social media lead capture.
+ * Description: Lightweight CRM integrated with WooCommerce (leads, forms, HubSpot/Zoho sync, orders, shipping, REST & shortcodes).
  * Version: 1.0.0
  * Author: Your Name
  * License: GPL2
@@ -16,6 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'WCP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WCP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
+// (Optional) Composer autoload if dependencies installed.
+if ( file_exists( WCP_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
+    require_once WCP_PLUGIN_DIR . 'vendor/autoload.php';
+}
+
 // Include core functionalities
 require_once WCP_PLUGIN_DIR . 'src/Core.php';
 
@@ -23,9 +28,20 @@ require_once WCP_PLUGIN_DIR . 'src/Core.php';
 add_action( 'plugins_loaded', 'wcp_init' );
 
 function wcp_init() {
-    // Load the core class
-    $core = new WCP\Core();
-    $core->init();
+    if ( class_exists( 'WCP\Core' ) ) {
+        // WooCommerce soft check (still allow limited operation without).
+        if ( ! class_exists( 'WooCommerce' ) ) {
+            add_action( 'admin_notices', function () {
+                echo '<div class="notice notice-warning"><p>WooCommerce CRM: WooCommerce not active – order sync disabled.</p></div>';
+            } );
+        }
+        $core = new WCP\Core();
+        $core->init();
+    } else {
+        add_action( 'admin_notices', function () {
+            echo '<div class="notice notice-error"><p>WooCommerce CRM: Core class missing.</p></div>';
+        } );
+    }
 }
 
 // Activation and deactivation hooks
@@ -33,10 +49,30 @@ register_activation_hook( __FILE__, 'wcp_activate' );
 register_deactivation_hook( __FILE__, 'wcp_deactivate' );
 
 function wcp_activate() {
-    // Code to run on activation
+    // TODO: create required options / DB tables with version flag.
+    global $wpdb;
+    $table = $wpdb->prefix . 'wcp_leads';
+    $charset = $wpdb->get_charset_collate();
+    $sql = "CREATE TABLE IF NOT EXISTS {$table} (
+        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        source VARCHAR(50) NOT NULL,
+        email VARCHAR(190) NULL,
+        phone VARCHAR(50) NULL,
+        name VARCHAR(190) NULL,
+        payload LONGTEXT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX (email),
+        INDEX (phone),
+        INDEX (source)
+    ) {$charset};";
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    dbDelta( $sql );
+    add_option( 'wcp_version', '1.0.0' );
 }
 
 function wcp_deactivate() {
-    // Code to run on deactivation
+    // TODO: scheduled events cleanup if added later.
 }
+
+// NOTE: Removed secondary duplicate bootstrap (universal-lead-capture-plugin.php) during cleanup.
 ?>

@@ -1,16 +1,23 @@
 # Node
 node_modules/
+
 # Composer / PHP
 vendor/
 composer.lock
-# WordPress / plugin
-wp-content/uploads/
-*.log
+
+# Environment / local
 .env
+*.log
 *.sql
+
+# System / IDE
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
-phpunit.xml
+
+# WordPress uploads (if any)
+wp-content/uploads/
+
+# Test artifacts
 /tests/_output/

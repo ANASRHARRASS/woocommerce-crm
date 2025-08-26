@@ -1,66 +1,31 @@
-# woocommerce-crm
-crm system  interated with woocommerce 
-# WooCommerce CRM Plugin
+<!-- Removed duplicate developer doc. Use readme.txt only. -->
 
-Lightweight CRM integrated with WooCommerce — collects leads, syncs with third‑party CRMs (HubSpot, Zoho), manages orders and shipping rates, and exposes REST endpoints and shortcodes.
+Public-facing plugin description lives in readme.txt.
 
-## Features
-- Contact & dynamic forms (public shortcodes)
-- Admin dashboard + settings
-- Integrations: HubSpot, Zoho, Facebook, Instagram, TikTok
-- Order management & tracking helpers
-- Shipping rates and shipping manager
-- REST API endpoints and AJAX handlers
-- PHPUnit tests (unit + integration)
+Key directories:
+- Bootstrap: woocommerce-crm-plugin.php
+- Core loader: src/Core.php
+- Admin UI: src/Admin
+- Public/forms: src/Public, src/Forms, templates/
+- Integrations: src/Integrations
+- Orders/Shipping: src/Orders, src/Shipping
+- Utilities: src/Utils
+- REST/AJAX/Cron: includes/
+- Tests: tests/
 
-## Architecture / Key files
-- woocommerce-crm-plugin.php — plugin bootstrap
-- src/Core.php — plugin initialization and wiring
-- src/Admin/ — admin UI and settings
-- src/Public/ — public hooks and shortcodes
-- src/Forms/ — Contact, Dynamic and Reseller forms
-- src/Integrations/ — HubSpot, Zoho, Social integrations
-- src/Orders/, src/Shipping/ — order and shipping logic
-- src/Utils/ — helpers and logging
-- includes/ — AJAX handlers, cron jobs, REST API compatibility helpers
-- assets/ — CSS & JS (admin + public)
-- templates/ — PHP templates for admin and public views
-- tests/ — PHPUnit tests (bootstrap, unit, integration)
+Current tasks:
+- Flesh out Core service loading (admin/public/integrations)
+- Add secure form handling (nonce, sanitize, escape)
+- Implement custom tables (if needed) with upgrade routine
+- Add REST routes with permission callbacks
+- Increase test coverage (init, forms, integration stubs)
 
-## Overview
-Lightweight CRM integrated with WooCommerce. Collects leads, syncs with HubSpot/Zoho, manages orders and shipping rates, provides REST endpoints and shortcodes.
+Security checklist (quick):
+- Always capability check admin postbacks
+- Nonce verify form + AJAX
+- Escape output (esc_html/attr/url)
+- Sanitize all input before DB writes
+- Use prepared statements or WP wrappers
 
-## Where to look (entry points)
-- Plugin bootstrap: woocommerce-crm-plugin.php
-- Core wiring: src/Core.php
-- Admin UI: src/Admin/
-- Public shortcodes/forms: src/Public/, templates/public/
-- Integrations: src/Integrations/
-- Includes: includes/rest-api.php, includes/ajax-handlers.php, includes/cron-jobs.php
-
-## Tested environments
-- WordPress: specify version (e.g. 6.x)
-- WooCommerce: specify version
-- PHP: specify version(s), e.g. 8.1
-
-## Development notes
-- Never commit API keys — use environment variables.
-- Tests: see tests/ and phpunit.xml
-
-## Tasks for AI/reviewer
-1. Security audit (DB writes, nonce, sanitization/escaping, capability checks).  
-2. Bug fixes and code style suggestions.  
-3. Add/verify unit & integration tests.  
-4. Performance and WP best-practices recommendations.
-
-## Contributing
-- Use feature branches, open PRs to main
-- Run tests and linters locally before PR
-- Add unit/integration tests for new features
-
-## License
-GPL-2.0-or-later (see LICENSE)
-
-## Contact
-Author: ANASRHARRASS
+See CLEANUP_NOTES.md for recent maintenance actions.
 
