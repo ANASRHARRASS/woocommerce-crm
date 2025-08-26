@@ -44,6 +44,26 @@ function wcp_init() {
     }
 }
 
+// Admin settings bootstrap (UI).
+add_action( 'plugins_loaded', function () {
+    if ( is_admin() ) {
+        // Fallback include if composer autoload not present yet.
+        if ( ! class_exists( '\WCP\Admin\Settings' ) && file_exists( WCP_PLUGIN_DIR . 'src/Admin/Settings.php' ) ) {
+            require_once WCP_PLUGIN_DIR . 'src/Admin/Settings.php';
+        }
+        if ( class_exists( '\WCP\Admin\Settings' ) ) {
+            \WCP\Admin\Settings::init();
+        }
+    }
+} );
+
+// Add Settings link on plugins list.
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), function ( $links ) {
+    $url = admin_url( 'admin.php?page=wcp-settings' );
+    $links[] = '<a href="' . esc_url( $url ) . '">Settings</a>';
+    return $links;
+} );
+
 // Activation and deactivation hooks
 register_activation_hook( __FILE__, 'wcp_activate' );
 register_deactivation_hook( __FILE__, 'wcp_deactivate' );

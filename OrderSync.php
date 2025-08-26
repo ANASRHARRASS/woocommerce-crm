@@ -26,11 +26,14 @@ class OrderSync {
             'payload'=> [
                 'order_id' => $order_id,
                 'total'    => $order->get_total(),
-                'items'    => array_map( fn( $i ) => [
-                    'product_id' => $i->get_product_id(),
-                    'name'       => $i->get_name(),
-                    'qty'        => $i->get_quantity(),
-                ], $order->get_items() )
+                'items'    => array_map(
+                    fn( $i ) => [
+                        'product_id' => $i->get_product_id(),
+                        'name'       => $i->get_name(),
+                        'qty'        => $i->get_quantity(),
+                    ],
+                    $order->get_items()
+                )
             ],
         ];
         $this->leads->create_lead( $data );
