@@ -13,10 +13,12 @@ Lightweight CRM integrated with WooCommerce — collects leads, syncs with HubSp
 == Features ==
 - Lead & dynamic forms (shortcodes)
 - WooCommerce order -> lead conversion
-- Integrations (stubs): HubSpot, Zoho, Google Drive (export), WhatsApp (notify), Social (Facebook / Instagram / TikTok ingestion)
-- Modular integration loader (extensible)
-- REST/AJAX ready architecture (scaffolding)
+- Admin leads list + pagination
+- REST API (wcp/v1/leads) with API key header (X-WCP-Key)
+- Integrations (stubs): HubSpot, Zoho, Google Drive (export), WhatsApp (notify), Social ingestion hooks
+- Modular integration loader
 - Secure option storage (tokens stored in wcp_tokens option)
+- API key management (Settings)
 
 == Roadmap ==
 - Implement real API calls (current: stubs/placeholders)
@@ -33,6 +35,8 @@ Lightweight CRM integrated with WooCommerce — collects leads, syncs with HubSp
 
 == Usage ==
 Add shortcodes for forms (see forthcoming docs). Configure API keys via settings page (never hardcode secrets).
+REST create lead: POST /wp-json/wcp/v1/leads  Header: X-WCP-Key: (Settings API key)
+Body (JSON): {"email":"john@example.com","name":"John","source":"api","payload":{"foo":"bar"}}
 
 == Development Notes ==
 - Namespace alignment in progress; ensure src/ matches autoload declaration.

@@ -11,27 +11,39 @@ class LeadManager {
         $this->integrations = $integrations;
     }
 
-    public function create_lead( array $data ): int {
+    public function create( array $data ): int {
         global $wpdb;
         $table = $wpdb->prefix . 'wcp_leads';
 
-        $payload = isset( $data['payload'] ) ? wp_json_encode( $data['payload'] ) : null;
-        $insert  = [
+        $insert = [
             'source' => sanitize_text_field( $data['source'] ?? 'unknown' ),
             'email'  => isset( $data['email'] ) ? sanitize_email( $data['email'] ) : null,
             'phone'  => isset( $data['phone'] ) ? sanitize_text_field( $data['phone'] ) : null,
             'name'   => isset( $data['name'] ) ? sanitize_text_field( $data['name'] ) : null,
-            'payload'=> $payload,
+            'payload'=> isset( $data['payload'] ) ? wp_json_encode( $data['payload'] ) : null,
         ];
-        $wpdb->insert( $table, $insert );
-        $id = (int) $wpdb->insert_id;
 
+        $wpdb->insert( $table, $insert, [ '%s','%s','%s','%s','%s' ] );
+        $id = (int) $wpdb->insert_id;
         if ( $id ) {
             $lead = array_merge( $data, [ 'id' => $id ] );
             $this->sync_integrations( $lead );
             do_action( 'wcp_lead_created', $lead );
         }
         return $id;
+    }
+
+    public function list( int $page = 1, int $per_page = 20 ): array {
+        global $wpdb;
+        $table = $wpdb->prefix . 'wcp_leads';
+        $offset = max( 0, ( $page - 1 ) * $per_page );
+        $rows = $wpdb->get_results( $wpdb->prepare(
+            "SELECT * FROM {$table} ORDER BY id DESC LIMIT %d OFFSET %d",
+            $per_page,
+            $offset
+        ), ARRAY_A );
+        $total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+        return [ 'items' => $rows, 'total' => $total ];
     }
 
     protected function sync_integrations( array $lead ): void {

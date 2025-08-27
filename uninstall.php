@@ -9,6 +9,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 delete_option( 'woocommerce_crm_plugin_options' );
 delete_option( 'wcp_version' );
 delete_option( 'wcp_tokens' ); // integration tokens array.
+delete_option( 'wcp_api_key' );
 
 // Drop custom tables (if they exist).
 global $wpdb;

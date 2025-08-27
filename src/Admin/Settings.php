@@ -5,8 +5,9 @@ defined( 'ABSPATH' ) || exit;
 
 class Settings {
 
-    const OPTION_TOKENS = 'wcp_tokens';
-    const PAGE_SLUG     = 'wcp-settings';
+    const OPT_TOKENS  = 'wcp_tokens';
+    const OPT_API_KEY = 'wcp_api_key';
+    const SLUG        = 'wcp-settings';
 
     public static function init(): void {
         add_action( 'admin_menu', [ __CLASS__, 'menu' ] );
@@ -15,127 +16,98 @@ class Settings {
 
     public static function menu(): void {
         add_menu_page(
-            __( 'WooCommerce CRM', 'wcp' ),
-            __( 'WC CRM', 'wcp' ),
-            self::cap(),
-            self::PAGE_SLUG,
+            'WooCommerce CRM',
+            'WC CRM',
+            'manage_options',
+            self::SLUG,
             [ __CLASS__, 'render' ],
             'dashicons-groups',
             56
         );
     }
 
-    protected static function cap(): string {
-        return 'manage_options';
-    }
-
     public static function register(): void {
         register_setting(
             'wcp_settings',
-            self::OPTION_TOKENS,
+            self::OPT_TOKENS,
             [
-                'type'              => 'array',
+                'type' => 'array',
                 'sanitize_callback' => [ __CLASS__, 'sanitize_tokens' ],
-                'default'           => []
+                'default' => []
             ]
         );
+        add_settings_section( 'wcp_int', __( 'Integrations', 'wcp' ), function () {
+            echo '<p>' . esc_html__( 'Store API tokens (leave empty to disable).', 'wcp' ) . '</p>';
+        }, self::SLUG );
 
-        add_settings_section(
-            'wcp_integrations_section',
-            __( 'Integrations', 'wcp' ),
-            function () {
-                echo '<p>' . esc_html__( 'Store API tokens and enable integrations. Leave a field empty to disable that integration.', 'wcp' ) . '</p>';
-            },
-            self::PAGE_SLUG
-        );
-
-        foreach ( self::fields() as $key => $field ) {
+        foreach ( self::fields() as $k => $label ) {
             add_settings_field(
-                $key,
-                esc_html( $field['label'] ),
-                [ __CLASS__, 'field_input' ],
-                self::PAGE_SLUG,
-                'wcp_integrations_section',
-                [ 'key' => $key, 'type' => $field['type'], 'placeholder' => $field['placeholder'] ?? '' ]
+                $k,
+                esc_html( $label ),
+                [ __CLASS__, 'field' ],
+                self::SLUG,
+                'wcp_int',
+                [ 'key' => $k ]
             );
         }
     }
 
     protected static function fields(): array {
         return [
-            'hubspot'      => [ 'label' => __( 'HubSpot Private App Token', 'wcp' ), 'type' => 'password', 'placeholder' => 'pat-...' ],
-            'zoho'         => [ 'label' => __( 'Zoho Access Token', 'wcp' ), 'type' => 'password', 'placeholder' => '1000.xxxxx' ],
-            'google_drive' => [ 'label' => __( 'Google Drive API Token', 'wcp' ), 'type' => 'password', 'placeholder' => 'ya29.a0...' ],
-            'whatsapp'     => [ 'label' => __( 'WhatsApp API Token', 'wcp' ), 'type' => 'password', 'placeholder' => 'EAA...' ],
+            'hubspot' => 'HubSpot Token',
+            // Add additional tokens here.
         ];
     }
 
     public static function sanitize_tokens( $input ): array {
         $clean = [];
         if ( is_array( $input ) ) {
-            $allowed = array_keys( self::fields() );
-            foreach ( $allowed as $key ) {
-                if ( empty( $input[ $key ] ) ) {
-                    continue;
+            foreach ( self::fields() as $k => $_ ) {
+                if ( ! empty( $input[ $k ] ) ) {
+                    $clean[ $k ] = trim( wp_unslash( $input[ $k ] ) );
                 }
-                // Basic trimming only (tokens may contain symbols) – do not over-sanitize.
-                $clean[ $key ] = trim( wp_unslash( $input[ $key ] ) );
             }
         }
-        // Persist only supplied non-empty tokens.
         return $clean;
     }
 
-    public static function field_input( array $args ): void {
-        $tokens = get_option( self::OPTION_TOKENS, [] );
-        $key    = $args['key'];
-        $type   = $args['type'];
-        $value  = isset( $tokens[ $key ] ) ? $tokens[ $key ] : '';
-        $placeholder = $args['placeholder'];
+    public static function field( array $args ): void {
+        $tokens = get_option( self::OPT_TOKENS, [] );
+        $key = $args['key'];
+        $val = $tokens[ $key ] ?? '';
         printf(
-            '<input type="%1$s" id="%2$s" name="%3$s[%2$s]" value="%4$s" class="regular-text" placeholder="%5$s" autocomplete="off" />',
-            esc_attr( $type ),
+            '<input type="password" name="%1$s[%2$s]" id="%2$s" value="%3$s" class="regular-text" autocomplete="off" />%4$s',
+            esc_attr( self::OPT_TOKENS ),
             esc_attr( $key ),
-            esc_attr( self::OPTION_TOKENS ),
-            esc_attr( $value ),
-            esc_attr( $placeholder )
+            esc_attr( $val ),
+            $val ? ' <span style="color:green;">' . esc_html__( 'Saved', 'wcp' ) . '</span>' : ''
         );
-        if ( $value ) {
-            echo ' <span style="color:green;">' . esc_html__( 'Saved', 'wcp' ) . '</span>';
+    }
+
+    protected static function ensure_api_key(): string {
+        $key = get_option( self::OPT_API_KEY );
+        if ( ! $key ) {
+            $key = bin2hex( random_bytes( 16 ) );
+            update_option( self::OPT_API_KEY, $key );
         }
+        return $key;
     }
 
     public static function render(): void {
-        if ( ! current_user_can( self::cap() ) ) {
-            wp_die( esc_html__( 'Access denied.', 'wcp' ) );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Access denied', 'wcp' ) );
         }
-        echo '<div class="wrap">';
-        echo '<h1>' . esc_html__( 'WooCommerce CRM – Settings', 'wcp' ) . '</h1>';
+        $api_key = self::ensure_api_key();
+        echo '<div class="wrap"><h1>WooCommerce CRM – Settings</h1>';
 
-        // Simple status overview.
-        $tokens = get_option( self::OPTION_TOKENS, [] );
-        echo '<h2>' . esc_html__( 'Status', 'wcp' ) . '</h2><ul>';
-        foreach ( self::fields() as $k => $f ) {
-            $active = isset( $tokens[ $k ] ) ? '✔' : '–';
-            printf(
-                '<li><strong>%s:</strong> %s</li>',
-                esc_html( $f['label'] ),
-                $active === '✔' ? '<span style="color:green;">' . esc_html__( 'Active', 'wcp' ) . '</span>' : '<span style="color:#666;">' . esc_html__( 'Inactive', 'wcp' ) . '</span>'
-            );
-        }
-        echo '</ul>';
+        echo '<h2>API Key</h2><p><code>' . esc_html( $api_key ) . '</code></p>';
+        echo '<p>' . esc_html__( 'Use this key in the X-WCP-Key header for REST lead creation.', 'wcp' ) . '</p>';
 
-        echo '<hr/><h2>' . esc_html__( 'API Tokens', 'wcp' ) . '</h2>';
+        echo '<hr><h2>' . esc_html__( 'Integrations', 'wcp' ) . '</h2>';
         echo '<form method="post" action="options.php">';
         settings_fields( 'wcp_settings' );
-        do_settings_sections( self::PAGE_SLUG );
-        submit_button( __( 'Save Tokens', 'wcp' ) );
-        echo '</form>';
-
-        echo '<hr/><h2>' . esc_html__( 'Tools', 'wcp' ) . '</h2>';
-        echo '<p>' . esc_html__( 'Programmatically ingest a social lead:', 'wcp' ) . '</p>';
-        echo '<code>do_action( "wcp_ingest_social_lead", "facebook", [ "email" =&gt; "john@example.com", "name" =&gt; "John" ] );</code>';
-
-        echo '</div>';
+        do_settings_sections( self::SLUG );
+        submit_button();
+        echo '</form></div>';
     }
 }

@@ -20,10 +20,10 @@ abstract class AbstractIntegration {
      * Sync a lead to the external service (stub).
      */
     public function sync_lead( array $lead ): void {
-        // Override in subclass (stub by default).
+        // Override in concrete integration.
     }
 
-    protected function get_token(): ?string {
+    protected function token(): ?string {
         $tokens = get_option( 'wcp_tokens', [] );
         return $tokens[ $this->token_key() ] ?? null;
     }
