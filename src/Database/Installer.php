@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class Installer {
 
-    private const CURRENT_SCHEMA_VERSION = '2.0.0';
+    private const CURRENT_SCHEMA_VERSION = '2.2.0';
     private const SCHEMA_OPTION_KEY = 'wccrm_schema_version';
 
     public function maybe_upgrade(): void {
@@ -33,6 +33,7 @@ class Installer {
         $this->create_contacts_table( $charset_collate );
         $this->create_contact_interests_table( $charset_collate );
         $this->create_form_submissions_table( $charset_collate );
+        $this->create_lead_journal_table( $charset_collate );
         
         // Keep existing wcp_leads table for backward compatibility
         $this->ensure_leads_table( $charset_collate );
@@ -71,11 +72,16 @@ class Installer {
             first_name VARCHAR(190) NULL,
             last_name VARCHAR(190) NULL,
             status VARCHAR(40) DEFAULT 'active',
+            stage VARCHAR(40) DEFAULT 'lead',
+            last_order_id BIGINT(20) UNSIGNED NULL,
+            total_spent DECIMAL(18,2) UNSIGNED NOT NULL DEFAULT 0.00,
+            order_count INT UNSIGNED NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             INDEX email (email),
             INDEX phone (phone),
             INDEX status (status),
+            INDEX stage (stage),
             INDEX created_at (created_at)
         ) {$charset_collate};";
         
@@ -118,6 +124,29 @@ class Installer {
             INDEX form_key (form_key),
             INDEX contact_id (contact_id),
             INDEX created_at (created_at)
+        ) {$charset_collate};";
+        
+        dbDelta( $sql );
+    }
+
+    private function create_lead_journal_table( string $charset_collate ): void {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'wccrm_lead_journal';
+        
+        $sql = "CREATE TABLE {$table_name} (
+            id BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            contact_id BIGINT(20) UNSIGNED NOT NULL,
+            event_type VARCHAR(60) NOT NULL,
+            message TEXT NOT NULL,
+            meta_data LONGTEXT NULL,
+            ref_id BIGINT(20) UNSIGNED NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX contact_id (contact_id),
+            INDEX event_type (event_type),
+            INDEX ref_id (ref_id),
+            INDEX created_at (created_at),
+            INDEX contact_event (contact_id, event_type)
         ) {$charset_collate};";
         
         dbDelta( $sql );

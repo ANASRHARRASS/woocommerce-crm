@@ -13,24 +13,29 @@ class CredentialResolver {
     private const OPTION_KEY = 'wccrm_secure_credentials';
     private const CIPHER_METHOD = 'AES-256-CBC';
 
-    public function get( string $key ): ?string {
-        $upper_key = strtoupper( $key );
+    public function get( string $service, ?string $key = null, bool $mask = false ): ?string {
+        $credential_key = $key ? strtoupper( $service . '_' . $key ) : strtoupper( $service );
         
         // 1. Check environment variable
-        $env_key = 'WCCRM_' . $upper_key;
+        $env_key = 'WCCRM_' . $credential_key;
         $env_value = $_ENV[ $env_key ] ?? getenv( $env_key );
         if ( $env_value !== false && $env_value !== '' ) {
-            return $env_value;
+            return $mask ? $this->mask_value( $env_value ) : $env_value;
         }
         
-        // 2. Check defined constant
-        $const_name = 'WCCRM_' . $upper_key;
-        if ( defined( $const_name ) ) {
-            return constant( $const_name );
+        // 2. Check option wccrm_tokens array
+        $tokens = get_option( 'wccrm_tokens', [] );
+        if ( is_array( $tokens ) && isset( $tokens[ $credential_key ] ) ) {
+            return $mask ? $this->mask_value( $tokens[ $credential_key ] ) : $tokens[ $credential_key ];
         }
         
-        // 3. Check encrypted option
-        return $this->get_encrypted_option( $key );
+        // 3. Apply filter for custom credential providers
+        $value = apply_filters( 'wccrm_credential_value', null, $service, $key );
+        if ( $value !== null ) {
+            return $mask ? $this->mask_value( $value ) : $value;
+        }
+        
+        return null;
     }
 
     public function set( string $key, string $value ): bool {
@@ -63,14 +68,14 @@ class CredentialResolver {
     }
 
     /**
-     * Mask credential value for display (show only last 4 characters)
+     * Mask credential value for display (show first 4 characters + ***)
      */
     public function mask_value( string $value ): string {
         if ( strlen( $value ) <= 4 ) {
             return str_repeat( '*', strlen( $value ) );
         }
         
-        return str_repeat( '*', strlen( $value ) - 4 ) . substr( $value, -4 );
+        return substr( $value, 0, 4 ) . '***';
     }
 
     /**

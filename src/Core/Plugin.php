@@ -70,12 +70,25 @@ class Plugin {
         $submissionHandler = new SubmissionHandler( $this->formRepository );
         $submissionLinker = new FormSubmissionLinker( $this->contactRepository, $this->interestUpdater );
         
+        // Order sync services
+        if ( class_exists( 'WooCommerce' ) ) {
+            new \Anas\WCCRM\Orders\OrderHooks( $this->contactRepository );
+        }
+        
         // Shipping services
         $this->carrierRegistry = new CarrierRegistry();
         $this->rateService = new RateService( $this->carrierRegistry );
         
         // Register example carrier
         $this->carrierRegistry->register( 'example', new ExampleCarrier() );
+        
+        // Enhanced shipping services
+        $shippingRegistry = new \Anas\WCCRM\Shipping\ShippingCarrierRegistry();
+        $shippingQuoteService = new \Anas\WCCRM\Shipping\QuoteService( $shippingRegistry );
+        
+        // Register sample carrier
+        $shippingRegistry->register( 'sample', new \Anas\WCCRM\Shipping\Carriers\SampleCarrier() );
+        $shippingRegistry->load_carriers(); // Load carriers via filter
         
         // News services
         $this->providerRegistry = new ProviderRegistry();
@@ -88,6 +101,11 @@ class Plugin {
         
         // Hook up form submission processing
         add_action( 'wccrm_form_submitted', [ $submissionLinker, 'process_submission' ], 10, 2 );
+        
+        // Initialize admin if in admin context
+        if ( is_admin() ) {
+            $this->init_admin( $shippingQuoteService, $shippingRegistry );
+        }
     }
 
     protected function register_hooks(): void {
@@ -112,6 +130,74 @@ class Plugin {
 
     protected function init_shipping(): void {
         add_filter( 'woocommerce_shipping_methods', [ $this, 'register_shipping_method' ] );
+    }
+
+    protected function init_admin( $quoteService, $shippingRegistry ): void {
+        // Initialize admin pages
+        new \Anas\WCCRM\Admin\ToolsPage( $this->contactRepository );
+        new \Anas\WCCRM\Admin\ShippingRatesPage( $quoteService, $shippingRegistry );
+        
+        // Hook into admin menu
+        add_action( 'admin_menu', [ $this, 'register_admin_menu' ] );
+    }
+
+    public function register_admin_menu(): void {
+        // Main menu
+        add_menu_page(
+            __( 'WooCommerce CRM', 'wccrm' ),
+            __( 'WC CRM', 'wccrm' ),
+            'manage_options',
+            'wccrm',
+            [ $this, 'render_dashboard_page' ],
+            'dashicons-groups',
+            30
+        );
+
+        // Submenu pages
+        add_submenu_page(
+            'wccrm',
+            __( 'Maintenance Tools', 'wccrm' ),
+            __( 'Tools', 'wccrm' ),
+            'manage_options',
+            'wccrm-tools',
+            [ $this, 'render_tools_page' ]
+        );
+
+        add_submenu_page(
+            'wccrm',
+            __( 'Shipping Rates', 'wccrm' ),
+            __( 'Shipping', 'wccrm' ),
+            'manage_options',
+            'wccrm-shipping-rates',
+            [ $this, 'render_shipping_page' ]
+        );
+    }
+
+    public function render_dashboard_page(): void {
+        echo '<div class="wrap">';
+        echo '<h1>' . esc_html__( 'WooCommerce CRM Dashboard', 'wccrm' ) . '</h1>';
+        echo '<p>' . esc_html__( 'Welcome to WooCommerce CRM. Use the menu items to access different features.', 'wccrm' ) . '</p>';
+        echo '</div>';
+    }
+
+    public function render_tools_page(): void {
+        $toolsPage = new \Anas\WCCRM\Admin\ToolsPage( $this->contactRepository );
+        $toolsPage->render();
+    }
+
+    public function render_shipping_page(): void {
+        // Get shipping services - we'll need to access the services initialized in init_services
+        static $shippingQuoteService, $shippingRegistry;
+        
+        if ( ! $shippingQuoteService ) {
+            $shippingRegistry = new \Anas\WCCRM\Shipping\ShippingCarrierRegistry();
+            $shippingQuoteService = new \Anas\WCCRM\Shipping\QuoteService( $shippingRegistry );
+            $shippingRegistry->register( 'sample', new \Anas\WCCRM\Shipping\Carriers\SampleCarrier() );
+            $shippingRegistry->load_carriers();
+        }
+        
+        $shippingPage = new \Anas\WCCRM\Admin\ShippingRatesPage( $shippingQuoteService, $shippingRegistry );
+        $shippingPage->render();
     }
 
     public function maybe_upgrade(): void {

@@ -51,6 +51,10 @@ class ContactRepository {
             'first_name' => sanitize_text_field( $data['first_name'] ?? '' ) ?: null,
             'last_name' => sanitize_text_field( $data['last_name'] ?? '' ) ?: null,
             'status' => sanitize_text_field( $data['status'] ?? 'active' ),
+            'stage' => sanitize_text_field( $data['stage'] ?? 'lead' ),
+            'last_order_id' => isset( $data['last_order_id'] ) ? absint( $data['last_order_id'] ) : null,
+            'total_spent' => isset( $data['total_spent'] ) ? floatval( $data['total_spent'] ) : 0.00,
+            'order_count' => isset( $data['order_count'] ) ? absint( $data['order_count'] ) : 0,
             'created_at' => current_time( 'mysql' ),
             'updated_at' => current_time( 'mysql' ),
         ];
@@ -58,7 +62,7 @@ class ContactRepository {
         $result = $wpdb->insert(
             $this->table_name,
             $insert_data,
-            [ '%s', '%s', '%s', '%s', '%s', '%s', '%s' ]
+            [ '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%f', '%d', '%s', '%s' ]
         );
 
         return $result !== false ? (int) $wpdb->insert_id : null;
@@ -91,11 +95,38 @@ class ContactRepository {
             $update_data['status'] = sanitize_text_field( $data['status'] );
         }
 
+        if ( isset( $data['stage'] ) ) {
+            $update_data['stage'] = sanitize_text_field( $data['stage'] );
+        }
+
+        if ( isset( $data['last_order_id'] ) ) {
+            $update_data['last_order_id'] = $data['last_order_id'] ? absint( $data['last_order_id'] ) : null;
+        }
+
+        if ( isset( $data['total_spent'] ) ) {
+            $update_data['total_spent'] = floatval( $data['total_spent'] );
+        }
+
+        if ( isset( $data['order_count'] ) ) {
+            $update_data['order_count'] = absint( $data['order_count'] );
+        }
+
+        $format_array = [];
+        foreach ( $update_data as $key => $value ) {
+            if ( in_array( $key, [ 'last_order_id', 'order_count' ], true ) ) {
+                $format_array[] = '%d';
+            } elseif ( $key === 'total_spent' ) {
+                $format_array[] = '%f';
+            } else {
+                $format_array[] = '%s';
+            }
+        }
+
         $result = $wpdb->update(
             $this->table_name,
             $update_data,
             [ 'id' => $id ],
-            array_fill( 0, count( $update_data ), '%s' ),
+            $format_array,
             [ '%d' ]
         );
 
