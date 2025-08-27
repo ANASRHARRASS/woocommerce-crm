@@ -44,6 +44,29 @@ class ContactRepositoryTest extends TestCase
         $this->assertTrue(method_exists($this->contactRepository, 'find_by_id'));
         $this->assertTrue(method_exists($this->contactRepository, 'find_by_email'));
         $this->assertTrue(method_exists($this->contactRepository, 'find_by_phone'));
+        
+        // Test new methods for stage and journal functionality
+        $this->assertTrue(method_exists($this->contactRepository, 'add_journal'));
+        $this->assertTrue(method_exists($this->contactRepository, 'set_stage'));
+        $this->assertTrue(method_exists($this->contactRepository, 'get_journal'));
+    }
+
+    public function testStageConstants()
+    {
+        $this->assertEquals(0, ContactRepository::STAGE_PENDING);
+        $this->assertEquals(1, ContactRepository::STAGE_QUALIFIED);
+        $this->assertEquals(2, ContactRepository::STAGE_CUSTOMER);
+        $this->assertEquals(3, ContactRepository::STAGE_LOST);
+    }
+
+    public function testStageLabels()
+    {
+        $labels = ContactRepository::get_stage_labels();
+        $this->assertIsArray($labels);
+        $this->assertEquals('Pending', $labels[ContactRepository::STAGE_PENDING]);
+        $this->assertEquals('Qualified', $labels[ContactRepository::STAGE_QUALIFIED]);
+        $this->assertEquals('Customer', $labels[ContactRepository::STAGE_CUSTOMER]);
+        $this->assertEquals('Lost', $labels[ContactRepository::STAGE_LOST]);
     }
 
     // TODO: Add more comprehensive tests with proper database mocking
