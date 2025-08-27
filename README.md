@@ -1,6 +1,6 @@
 # WooCommerce CRM Plugin
 
-A lightweight CRM integrated with WooCommerce featuring dynamic forms, contact management, multi-provider shipping, and news aggregation.
+A lightweight CRM integrated with WooCommerce featuring dynamic forms, contact management, multi-provider shipping, and social platform integration scaffolding.
 
 ## Features
 
@@ -9,7 +9,7 @@ A lightweight CRM integrated with WooCommerce featuring dynamic forms, contact m
 - **Dynamic Form Engine**: Create and manage custom forms with schema-based field definitions
 - **Contact Management**: Intelligent contact creation with interest tracking and weight-based scoring
 - **Multi-Provider Shipping**: Extensible shipping rate collection from multiple carriers
-- **News Aggregation**: Multi-provider news feed aggregation (scaffold for NewsAPI, GNews, RSS)
+- **Social Platform Integration**: Scaffolding for WhatsApp, TikTok, Instagram, and Facebook integrations
 - **Security**: Encrypted credential management with environment variable support
 - **Elementor Integration**: Native Elementor widget for form display
 - **Database Schema**: Versioned migrations with automatic upgrades
@@ -36,11 +36,6 @@ A lightweight CRM integrated with WooCommerce featuring dynamic forms, contact m
 - `CarrierRegistry`: Carrier registration and management
 - WooCommerce shipping method integration
 
-#### News (`src/News/`)
-- `NewsProviderInterface`: Interface for news providers
-- `Aggregator`: Multi-provider article collection with deduplication
-- Stub providers for NewsAPI, GNews, and Generic RSS
-
 ## Installation
 
 1. Upload the plugin files to `/wp-content/plugins/woocommerce-crm/`
@@ -52,12 +47,11 @@ A lightweight CRM integrated with WooCommerce featuring dynamic forms, contact m
 ### Environment Variables (Recommended)
 
 ```bash
-# News API Keys
-WCCRM_NEWSAPI_KEY=your_newsapi_key
-WCCRM_GNEWS_KEY=your_gnews_key
-
-# RSS Feed URL
-WCCRM_RSS_FEED_URL=https://example.com/feed.xml
+# Social Platform Integration Keys (Future Implementation)
+WCCRM_WHATSAPP_TOKEN=your_whatsapp_token
+WCCRM_FACEBOOK_APP_ID=your_facebook_app_id
+WCCRM_INSTAGRAM_APP_ID=your_instagram_app_id
+WCCRM_TIKTOK_APP_ID=your_tiktok_app_id
 
 # Other integrations
 WCCRM_HUBSPOT_API_KEY=your_hubspot_key
@@ -67,8 +61,10 @@ WCCRM_HUBSPOT_API_KEY=your_hubspot_key
 
 ```php
 // In wp-config.php
-define('WCCRM_NEWSAPI_KEY', 'your_newsapi_key');
-define('WCCRM_GNEWS_KEY', 'your_gnews_key');
+define('WCCRM_WHATSAPP_TOKEN', 'your_whatsapp_token');
+define('WCCRM_FACEBOOK_APP_ID', 'your_facebook_app_id');
+define('WCCRM_INSTAGRAM_APP_ID', 'your_instagram_app_id');
+define('WCCRM_TIKTOK_APP_ID', 'your_tiktok_app_id');
 ```
 
 **Important**: Never commit API keys to version control. Use environment variables or encrypted storage.
@@ -98,9 +94,6 @@ $plugin = wccrm_get_plugin();
 $formRepo = $plugin->get_form_repository();
 $contactRepo = $plugin->get_contact_repository();
 $credentialResolver = $plugin->get_credential_resolver();
-
-// Debug news aggregation
-do_action('wccrm_debug_fetch_news');
 ```
 
 ## Database Schema
@@ -157,23 +150,6 @@ $plugin = wccrm_get_plugin();
 $plugin->get_carrier_registry()->register('my_carrier', new MyCarrier());
 ```
 
-### Adding New News Providers
-
-```php
-use Anas\WCCRM\News\Contracts\NewsProviderInterface;
-use Anas\WCCRM\News\DTO\Article;
-
-class MyNewsProvider implements NewsProviderInterface {
-    public function fetch(array $params): array {
-        // Return Article objects
-    }
-}
-
-// Register provider
-$plugin = wccrm_get_plugin();
-$plugin->get_news_aggregator()->getProviderRegistry()->register('my_provider', new MyNewsProvider());
-```
-
 ## Security
 
 - All form inputs are sanitized and validated
@@ -182,16 +158,32 @@ $plugin->get_news_aggregator()->getProviderRegistry()->register('my_provider', n
 - SQL injection protection via $wpdb->prepare()
 - XSS protection via esc_html/esc_attr
 
-## TODO Items
+## Roadmap & TODO Items
 
+### Core CRM Features
 - [ ] Rate limiting for form submissions
 - [ ] Spam protection (honeypot fields)
 - [ ] Interest decay logic based on age
 - [ ] Admin capability checks for sensitive operations
-- [ ] News article caching for performance
 - [ ] Logging system for debugging
 - [ ] Admin UI for form management
 - [ ] Import/export functionality
+- [ ] Customer timeline and interaction history
+- [ ] Advanced order segmentation and metrics
+
+### Social Platform Integration
+- [ ] WhatsApp message dispatch and webhook handling
+- [ ] TikTok lead ingestion and webhook processing
+- [ ] Facebook/Instagram webhook ingestion for leads
+- [ ] Social platform contact synchronization
+- [ ] Multi-channel messaging automation
+
+### Advanced CRM Features
+- [ ] Automation rules engine with trigger/action system
+- [ ] Customer journey mapping and analytics
+- [ ] Advanced reporting dashboard
+- [ ] Lead scoring and qualification workflows
+- [ ] A/B testing for forms and messaging
 
 ## Legacy Compatibility
 

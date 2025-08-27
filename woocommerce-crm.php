@@ -99,9 +99,6 @@ register_deactivation_hook( __FILE__, 'wccrm_deactivate' );
 function wccrm_deactivate() {
     // Clear any scheduled events
     wp_clear_scheduled_hook( 'wccrm_cleanup_old_interests' );
-    
-    // Clean up transients
-    delete_transient( 'wccrm_news_' );
 }
 
 // Utility function for logging (backward compatibility)
