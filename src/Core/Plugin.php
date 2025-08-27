@@ -54,6 +54,7 @@ class Plugin {
         $this->register_shortcodes();
         $this->init_elementor();
         $this->init_shipping();
+        $this->init_admin();
         
         do_action( 'wccrm_after_init', $this );
     }
@@ -112,6 +113,16 @@ class Plugin {
 
     protected function init_shipping(): void {
         add_filter( 'woocommerce_shipping_methods', [ $this, 'register_shipping_method' ] );
+    }
+
+    protected function init_admin(): void {
+        if ( is_admin() ) {
+            // Initialize new admin UI
+            new \Anas\WCCRM\Admin\Menu();
+            
+            // Initialize admin notices
+            \Anas\WCCRM\Admin\Notices::init();
+        }
     }
 
     public function maybe_upgrade(): void {
