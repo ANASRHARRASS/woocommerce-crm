@@ -31,4 +31,14 @@ interface NewsProviderInterface {
      * Check if provider is enabled/available
      */
     public function is_enabled(): bool;
+
+    /**
+     * Get cache TTL for this provider (in seconds)
+     */
+    public function get_cache_ttl(): int;
+
+    /**
+     * Get rate limit for this provider (requests per minute)
+     */
+    public function get_rate_limit(): int;
 }
