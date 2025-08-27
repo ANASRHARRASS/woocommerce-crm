@@ -2,7 +2,6 @@
 
 namespace Anas\WCCRM\News\Providers;
 
-use Anas\WCCRM\News\Contracts\NewsProviderInterface;
 use Anas\WCCRM\News\DTO\Article;
 use Anas\WCCRM\Security\CredentialResolver;
 
@@ -12,13 +11,7 @@ defined( 'ABSPATH' ) || exit;
  * NewsAPI provider (stub implementation)
  * TODO: Implement actual NewsAPI integration
  */
-class NewsApiProvider implements NewsProviderInterface {
-
-    private CredentialResolver $credentialResolver;
-
-    public function __construct( CredentialResolver $credentialResolver ) {
-        $this->credentialResolver = $credentialResolver;
-    }
+class NewsApiProvider extends AbstractHttpProvider {
 
     public function fetch( array $params ): array {
         // TODO: Implement actual NewsAPI integration
@@ -33,32 +26,25 @@ class NewsApiProvider implements NewsProviderInterface {
         // Placeholder: Would make actual API call here
         // Example implementation would be:
         /*
-        $query = $params['query'] ?? 'business';
-        $limit = min( (int) ( $params['limit'] ?? 10 ), 100 );
+        $query = sanitize_text_field( $params['query'] ?? 'business' );
+        $limit = min( max( 1, (int) ( $params['limit'] ?? 10 ) ), 100 );
+        $language = sanitize_text_field( $params['language'] ?? 'en' );
         
-        $response = wp_remote_get( "https://newsapi.org/v2/everything?q={$query}&pageSize={$limit}&apiKey={$api_key}" );
+        $url = add_query_arg( [
+            'q' => $query,
+            'pageSize' => $limit,
+            'language' => $language,
+            'sortBy' => 'publishedAt',
+            'apiKey' => $api_key,
+        ], 'https://newsapi.org/v2/everything' );
         
-        if ( is_wp_error( $response ) ) {
-            throw new \Exception( 'NewsAPI request failed: ' . $response->get_error_message() );
-        }
+        $data = $this->make_request( $url );
         
-        $body = wp_remote_retrieve_body( $response );
-        $data = json_decode( $body, true );
-        
-        if ( ! isset( $data['articles'] ) ) {
+        if ( ! isset( $data['articles'] ) || ! is_array( $data['articles'] ) ) {
             return [];
         }
         
-        return array_map( function( $article ) {
-            return new Article( [
-                'title' => $article['title'],
-                'url' => $article['url'],
-                'source' => $article['source']['name'] ?? 'NewsAPI',
-                'published_at' => $article['publishedAt'],
-                'description' => $article['description'],
-                'urlToImage' => $article['urlToImage'],
-            ] );
-        }, $data['articles'] );
+        return $this->create_articles( $data['articles'] );
         */
 
         return []; // Return empty array for stub
@@ -76,5 +62,24 @@ class NewsApiProvider implements NewsProviderInterface {
         // Only enabled if API key is available
         $api_key = $this->credentialResolver->get( 'NEWSAPI_KEY' );
         return ! empty( $api_key );
+    }
+
+    public function get_cache_ttl(): int {
+        return 1800; // 30 minutes
+    }
+
+    public function get_rate_limit(): int {
+        return 50; // NewsAPI free tier allows 1000 requests per day
+    }
+
+    protected function normalize_article_data( array $raw_article ): array {
+        return [
+            'title' => $raw_article['title'] ?? '',
+            'url' => $raw_article['url'] ?? '',
+            'source' => $raw_article['source']['name'] ?? $this->get_name(),
+            'published_at' => $raw_article['publishedAt'] ?? '',
+            'description' => $raw_article['description'] ?? '',
+            'urlToImage' => $raw_article['urlToImage'] ?? '',
+        ];
     }
 }
