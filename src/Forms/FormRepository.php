@@ -1,0 +1,157 @@
+<?php
+
+namespace Anas\WCCRM\Forms;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Form repository for CRUD operations
+ */
+class FormRepository {
+
+    private string $table_name;
+
+    public function __construct() {
+        global $wpdb;
+        $this->table_name = $wpdb->prefix . 'wccrm_forms';
+    }
+
+    public function create( array $data ): ?FormModel {
+        global $wpdb;
+
+        $insert_data = [
+            'form_key' => sanitize_key( $data['form_key'] ?? '' ),
+            'name' => sanitize_text_field( $data['name'] ?? '' ),
+            'schema_json' => wp_json_encode( $data['schema'] ?? [] ),
+            'status' => sanitize_text_field( $data['status'] ?? 'active' ),
+            'created_at' => current_time( 'mysql' ),
+            'updated_at' => current_time( 'mysql' ),
+        ];
+
+        $result = $wpdb->insert(
+            $this->table_name,
+            $insert_data,
+            [ '%s', '%s', '%s', '%s', '%s', '%s' ]
+        );
+
+        if ( $result === false ) {
+            return null;
+        }
+
+        $insert_data['id'] = $wpdb->insert_id;
+        return new FormModel( $insert_data );
+    }
+
+    public function update( int $id, array $data ): ?FormModel {
+        global $wpdb;
+
+        $update_data = [
+            'updated_at' => current_time( 'mysql' ),
+        ];
+
+        if ( isset( $data['name'] ) ) {
+            $update_data['name'] = sanitize_text_field( $data['name'] );
+        }
+
+        if ( isset( $data['schema'] ) ) {
+            $update_data['schema_json'] = wp_json_encode( $data['schema'] );
+        }
+
+        if ( isset( $data['status'] ) ) {
+            $update_data['status'] = sanitize_text_field( $data['status'] );
+        }
+
+        $result = $wpdb->update(
+            $this->table_name,
+            $update_data,
+            [ 'id' => $id ],
+            array_fill( 0, count( $update_data ), '%s' ),
+            [ '%d' ]
+        );
+
+        if ( $result === false ) {
+            return null;
+        }
+
+        return $this->load_by_id( $id );
+    }
+
+    public function delete( int $id ): bool {
+        global $wpdb;
+
+        $result = $wpdb->delete(
+            $this->table_name,
+            [ 'id' => $id ],
+            [ '%d' ]
+        );
+
+        return $result !== false;
+    }
+
+    public function load_by_id( int $id ): ?FormModel {
+        global $wpdb;
+
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->table_name} WHERE id = %d",
+                $id
+            ),
+            ARRAY_A
+        );
+
+        return $row ? new FormModel( $row ) : null;
+    }
+
+    public function load_by_key( string $form_key ): ?FormModel {
+        global $wpdb;
+
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->table_name} WHERE form_key = %s",
+                $form_key
+            ),
+            ARRAY_A
+        );
+
+        return $row ? new FormModel( $row ) : null;
+    }
+
+    public function list_active(): array {
+        global $wpdb;
+
+        $rows = $wpdb->get_results(
+            "SELECT * FROM {$this->table_name} WHERE status = 'active' ORDER BY name ASC",
+            ARRAY_A
+        );
+
+        return array_map( function( $row ) {
+            return new FormModel( $row );
+        }, $rows );
+    }
+
+    public function list_all( int $page = 1, int $per_page = 20 ): array {
+        global $wpdb;
+
+        $offset = max( 0, ( $page - 1 ) * $per_page );
+
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->table_name} ORDER BY created_at DESC LIMIT %d OFFSET %d",
+                $per_page,
+                $offset
+            ),
+            ARRAY_A
+        );
+
+        $total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table_name}" );
+
+        return [
+            'items' => array_map( function( $row ) {
+                return new FormModel( $row );
+            }, $rows ),
+            'total' => $total,
+            'page' => $page,
+            'per_page' => $per_page,
+        ];
+    }
+}
