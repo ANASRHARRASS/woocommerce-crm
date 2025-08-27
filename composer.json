@@ -3,19 +3,18 @@
     "description": "WooCommerce CRM Plugin: leads, forms, HubSpot & Zoho sync, order & shipping helpers.",
     "type": "wordpress-plugin",
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.0",
         "guzzlehttp/guzzle": "^7.0",
         "vlucas/phpdotenv": "^5.0"
     },
     "autoload": {
         "psr-4": {
-            "WooCommerceCRMPlugin\\": "src/",
-            "WCP\\": "src/"
+            "Anas\\WCCRM\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "WooCommerceCRMPlugin\\Tests\\": "tests/"
+            "Anas\\WCCRM\\Tests\\": "tests/"
         }
     },
     "minimum-stability": "stable",
