@@ -4,13 +4,22 @@ A lightweight CRM integrated with WooCommerce featuring dynamic forms, contact m
 
 ## Features
 
-### Phase 2 Architecture (v2.0+)
+### Phase 2 Architecture (v2.0+) - Enhanced Scaffolding
+
+**Phase 2A - Orders**: Order synchronization, metrics calculation, and historical backfill management
+**Phase 2B - Forms/Consent**: Form versioning and GDPR-compliant consent tracking  
+**Phase 2C - Messaging**: Multi-channel messaging (email, SMS, WhatsApp) with templates and consent management
+**Phase 2D - Social Leads**: Social media platform webhook integration and lead normalization
+**Phase 2E - COD Workflow**: Cash-on-delivery verification and workflow management
+**Phase 2F - Automation**: Rule-based automation engine with conditions and actions
+**Phase 2G - Security/Compliance**: Audit logging, data retention, and GDPR erasure services
+**Phase 2H - Reporting**: Metrics aggregation and dashboard functionality
 
 - **Dynamic Form Engine**: Create and manage custom forms with schema-based field definitions
 - **Contact Management**: Intelligent contact creation with interest tracking and weight-based scoring
 - **Multi-Provider Shipping**: Extensible shipping rate collection from multiple carriers
-- **News Aggregation**: Multi-provider news feed aggregation (scaffold for NewsAPI, GNews, RSS)
-- **Security**: Encrypted credential management with environment variable support
+- **Enhanced News Aggregation**: Multi-provider news feed aggregation with rate limiting and caching (NewsAPI, GNews, RSS)
+- **Security**: Encrypted credential management with environment variable support - NO API KEYS IN CODE
 - **Elementor Integration**: Native Elementor widget for form display
 - **Database Schema**: Versioned migrations with automatic upgrades
 
