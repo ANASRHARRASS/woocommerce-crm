@@ -42,6 +42,18 @@ class FormSubmissionLinker {
             return;
         }
 
+        // Detect source from submission data
+        $source = $this->detect_source( $submission_data, $submission['form_key'] );
+        if ( $source ) {
+            $contact_data['source'] = $source;
+        }
+
+        // Detect WhatsApp consent
+        $consent_flags = $this->detect_consent_flags( $submission_data );
+        if ( ! empty( $consent_flags ) ) {
+            $contact_data['consent_flags'] = $consent_flags;
+        }
+
         // Create or update contact
         $contact_id = $this->contactRepository->upsert_by_email_or_phone( $contact_data );
         
@@ -233,5 +245,45 @@ class FormSubmissionLinker {
             'page' => $page,
             'per_page' => $per_page,
         ];
+    }
+
+    /**
+     * Detect source from submission data
+     */
+    protected function detect_source( array $submission_data, string $form_key ): ?string {
+        // Try to find source from various field names
+        $source_fields = [ 'source', 'lead_source', 'utm_source' ];
+        
+        foreach ( $source_fields as $field ) {
+            if ( ! empty( $submission_data[ $field ] ) ) {
+                return sanitize_text_field( $submission_data[ $field ] );
+            }
+        }
+
+        // Default to form key if no source found
+        return 'form:' . $form_key;
+    }
+
+    /**
+     * Detect consent flags from submission data
+     */
+    protected function detect_consent_flags( array $submission_data ): array {
+        $consent_flags = [];
+
+        // Check for WhatsApp consent
+        $whatsapp_fields = [ 'whatsapp_consent', 'consent_whatsapp', 'whatsapp_optin', 'optin_whatsapp' ];
+        $truthy_values = [ '1', 'on', 'yes', 'true', 'accepted' ];
+
+        foreach ( $whatsapp_fields as $field ) {
+            if ( isset( $submission_data[ $field ] ) ) {
+                $value = strtolower( trim( $submission_data[ $field ] ) );
+                if ( in_array( $value, $truthy_values, true ) ) {
+                    $consent_flags['whatsapp'] = true;
+                    break;
+                }
+            }
+        }
+
+        return $consent_flags;
     }
 }
