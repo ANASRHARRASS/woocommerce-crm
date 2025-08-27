@@ -1,6 +1,6 @@
 <?php
 /**
- * Main Plugin bootstrap (Phase 2 skeleton - News module removed per user request for now)
+ * Main Plugin bootstrap for WooCommerce CRM core functionality
  */
 
 namespace Anas\WCCRM\Core;
