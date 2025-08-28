@@ -37,7 +37,8 @@ if ( file_exists( WCCRM_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
 spl_autoload_register( function ( $class ) {
     // Handle Anas\WCCRM namespace
     if ( strpos( $class, 'Anas\\WCCRM\\' ) === 0 ) {
-        $path = WCCRM_PLUGIN_DIR . 'src/' . str_replace( [ '\\', 'Anas/WCCRM/' ], [ '/', '' ], substr( $class, 11 ) ) . '.php';
+        $relative_class = substr( $class, 11 ); // Remove 'Anas\WCCRM\'
+        $path = WCCRM_PLUGIN_DIR . 'src/' . str_replace( '\\', '/', $relative_class ) . '.php';
         if ( file_exists( $path ) ) {
             require_once $path;
         }
@@ -45,7 +46,7 @@ spl_autoload_register( function ( $class ) {
     
     // Handle KS_CRM namespace 
     if ( strpos( $class, 'KS_CRM\\' ) === 0 ) {
-        $path = WCCRM_PLUGIN_DIR . 'src/' . str_replace( [ '\\', 'KS_CRM/' ], [ '/', '' ], substr( $class, 7 ) ) . '.php';
+        $path = WCCRM_PLUGIN_DIR . 'src/' . str_replace( '\\', '/', $class ) . '.php';
         if ( file_exists( $path ) ) {
             require_once $path;
         }
