@@ -33,15 +33,23 @@ if ( file_exists( WCCRM_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
     require_once WCCRM_PLUGIN_DIR . 'vendor/autoload.php';
 }
 
-// PSR-4 autoloader for our namespace
+// PSR-4 autoloader for our namespaces
 spl_autoload_register( function ( $class ) {
+    // Handle Anas\WCCRM namespace
     if ( strpos( $class, 'Anas\\WCCRM\\' ) === 0 ) {
         $path = WCCRM_PLUGIN_DIR . 'src/' . str_replace( [ '\\', 'Anas/WCCRM/' ], [ '/', '' ], substr( $class, 11 ) ) . '.php';
         if ( file_exists( $path ) ) {
             require_once $path;
         }
     }
-} );
+    // Handle KS_CRM namespace
+    elseif ( strpos( $class, 'KS_CRM\\' ) === 0 ) {
+        $path = WCCRM_PLUGIN_DIR . 'src/' . str_replace( '\\', '/', $class ) . '.php';
+        if ( file_exists( $path ) ) {
+            require_once $path;
+        }
+    }
+} );;
 
 // Initialize the plugin
 add_action( 'plugins_loaded', 'wccrm_init' );
@@ -58,8 +66,9 @@ function wccrm_init() {
 
     // Initialize the main plugin
     try {
-        $plugin = \Anas\WCCRM\Core\Plugin::instance();
-        $plugin->init();
+        global $wccrm_plugin;
+        $wccrm_plugin = \Anas\WCCRM\Core\Plugin::instance();
+        $wccrm_plugin->init();
     } catch ( \Exception $e ) {
         add_action( 'admin_notices', function () use ( $e ) {
             echo '<div class="notice notice-error"><p>';
@@ -77,6 +86,11 @@ function wccrm_activate() {
     // Generate API key for backward compatibility
     if ( ! get_option( 'wcp_api_key' ) ) {
         add_option( 'wcp_api_key', bin2hex( random_bytes( 16 ) ) );
+    }
+
+    // Schedule retention cleanup if not already scheduled
+    if ( ! wp_next_scheduled( 'kscrm_daily_retention_cleanup' ) ) {
+        wp_schedule_event( time(), 'daily', 'kscrm_daily_retention_cleanup' );
     }
 
     // Run database migrations

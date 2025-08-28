@@ -80,6 +80,13 @@ class Plugin {
     protected MetricsAggregator $metricsAggregator;
     protected DashboardController $dashboardController;
 
+    // v0.5.0 services
+    protected $providerRegistry;
+    protected $exportController;
+    protected $toolsPage;
+    protected $retentionManager;
+    protected $noticeManager;
+
     public static function instance(): Plugin { return self::$instance ??= new self(); }
     private function __construct() {}
 
@@ -155,6 +162,19 @@ class Plugin {
         $this->carrierRegistry = new CarrierRegistry();
         $this->rateService     = new RateService($this->carrierRegistry);
         $this->carrierRegistry->register('example', new ExampleCarrier());
+
+        // v0.5.0 Enhanced Services
+        $this->providerRegistry    = new \KS_CRM\Providers\Provider_Registry();
+        $this->exportController    = new \KS_CRM\Exports\Export_Controller();
+        $this->toolsPage          = new \KS_CRM\Admin\Tools_Page();
+        $this->retentionManager   = new \KS_CRM\Retention\Retention_Manager();
+        $this->noticeManager      = new \KS_CRM\Admin\Notice_Manager();
+        
+        // Initialize v0.5.0 services
+        $this->exportController->register_routes();
+        $this->toolsPage->init();
+        $this->retentionManager->init();
+        $this->noticeManager->init();
 
         // Form submission linking
         $submissionLinker = new FormSubmissionLinker($this->contactRepository, $this->interestUpdater);

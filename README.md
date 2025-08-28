@@ -193,6 +193,124 @@ $plugin->get_news_aggregator()->getProviderRegistry()->register('my_provider', n
 - [ ] Admin UI for form management
 - [ ] Import/export functionality
 
+## v0.5.0 Enhanced Features
+
+### Provider Framework
+- **Unified Provider Architecture**: Abstract base classes for News and Shipping providers with normalized response formats
+- **Provider Registry**: Central service managing both news and shipping providers
+- **Normalized Data**: Guaranteed response keys (id, title, url, source, published_at for news; provider, service, cost, currency, eta for shipping)
+
+### Secrets Management
+- **KS_CRM\Config\Secrets**: Central credential lookup without storing secrets
+- **Multiple Sources**: Checks defined constants, environment variables, and filter hooks
+- **Admin Notices**: Dismissible notices for missing API keys per user session
+
+### Caching System
+- **Namespace Support**: `KS_CRM\Cache\Cache_Manager::remember()` with namespace-specific TTL
+- **Filter Integration**: `kscrm_cache_ttl_news`, `kscrm_cache_ttl_shipping` filters
+- **Management Tools**: Clear cache by namespace or globally
+
+### Rate Limiting
+- **Public Endpoint Protection**: IP-based throttling (default: 30 requests / 10 minutes)
+- **Transient Storage**: Uses `kscrm_rl_{endpoint}_{hash}` pattern
+- **Configurable**: Adjustable limits per endpoint
+
+### Data Export & Tools
+- **REST Endpoints**: `/ks-crm/v1/export/{leads,utm,news}` with `manage_woocommerce` permission
+- **CSV Export**: Memory-safe streaming with `KS_CRM\Exports\CSV_Writer`
+- **Tools Admin Page**: New "Woo CRM > Tools" submenu for exports and cache management
+- **Multiple Formats**: CSV and JSON export options
+
+### Data Retention
+- **Configurable Cleanup**: Settings for leads (months, default 24) and UTM stats (days, default 365)
+- **Automated Purging**: Daily wp_cron event for old data cleanup
+- **Manual Control**: CLI commands and tools page controls
+
+### CLI Commands (wp-cli)
+```bash
+wp kscrm export leads [--path=<file>] [--format=csv|json] [--limit=<num>]
+wp kscrm export utm [--format=csv|json]
+wp kscrm export news [--format=json]
+wp kscrm stats recalc [--batch-size=<num>] [--dry-run]
+wp kscrm cache clear [<namespace>]
+wp kscrm retention run|status|config [--leads-months=<num>] [--utm-days=<num>]
+```
+
+### Dashboard Enhancements
+- **Date Range Selector**: 7/30/90 days with user preference persistence
+- **New Metrics**: AOV, Repeat Purchase Rate, Top Product, Returning Customers %
+- **Additional Charts**: Revenue vs AOV line chart, Returning vs New Customers stacked bar
+- **Real-time Updates**: AJAX-powered dashboard refresh
+
+### Security Features
+- **Uninstall Safeguards**: Data removal only with `KSCRM_REMOVE_ALL_DATA` constant
+- **Honeypot Protection**: Hidden fields + timestamp validation (min 3 seconds)
+- **Form Security**: Nonces, rate limiting, and spam detection
+- **Input Validation**: All new inputs escaped, sanitized, and validated
+
+### WhatsApp Integration
+- **Template System**: Filterable templates for common scenarios
+- **Available Filters**:
+  - `kscrm_whatsapp_template_cart_share`
+  - `kscrm_whatsapp_template_order_confirm`
+  - `kscrm_whatsapp_template_product_inquiry`
+  - `kscrm_whatsapp_template_shipping_update`
+  - `kscrm_whatsapp_template_abandoned_cart`
+  - `kscrm_whatsapp_template_promotional`
+- **URL Generation**: `wa.me` and `web.whatsapp.com` link creation
+
+### Configuration Constants
+```php
+define( 'KSCRM_CACHE_DEFAULT_TTL', 3600 ); // Default cache TTL
+define( 'KSCRM_REMOVE_ALL_DATA', true );   // Enable data removal on uninstall
+define( 'NEWSAPI_KEY', 'your-key' );       // API keys as constants
+define( 'SHIPPING_API_KEY', 'your-key' );  // Provider credentials
+```
+
+### Filter Hooks
+```php
+// Cache TTL per namespace
+add_filter( 'kscrm_cache_ttl_news', function() { return 7200; } );
+add_filter( 'kscrm_cache_ttl_shipping', function() { return 1800; } );
+
+// Secret lookup override
+add_filter( 'kscrm_secret_lookup', function( $value, $key ) {
+    return $your_custom_lookup_logic;
+}, 10, 2 );
+
+// WhatsApp template customization
+add_filter( 'kscrm_whatsapp_template_cart_share', function( $template ) {
+    return 'Your custom cart share message: {cart_items}';
+} );
+
+// Rate limiting IP whitelist
+add_filter( 'kscrm_honeypot_ip_whitelist', function( $ips ) {
+    $ips[] = '192.168.1.100';
+    return $ips;
+} );
+```
+
+### API Integration Examples
+```php
+// Use secrets helper
+$api_key = \KS_CRM\Config\Secrets::get( 'NEWSAPI_KEY' );
+
+// Cache with namespace
+$data = \KS_CRM\Cache\Cache_Manager::remember( 'news', 'latest', 3600, function() {
+    return fetch_news_from_api();
+} );
+
+// Export data programmatically
+$export_url = rest_url( 'ks-crm/v1/export/leads?format=csv' );
+
+// WhatsApp message generation
+$message = \KS_CRM\WhatsApp\Templates::get_order_confirm_template( [
+    'order_number' => '1234',
+    'order_total' => '$99.99',
+    'order_status' => 'Processing'
+] );
+```
+
 ## Legacy Compatibility
 
 The plugin maintains backward compatibility with v1.x:
