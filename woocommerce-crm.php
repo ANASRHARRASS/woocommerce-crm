@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: WooCommerce CRM Plugin
+ * Plugin Name: WooCommerce CRM Plugin (Kachkhat Saber)
  * Description: Lightweight CRM integrated with WooCommerce (leads, forms, HubSpot/Zoho sync, orders, shipping, REST & shortcodes).
- * Version: 2.0.0
+ * Version: 0.5.0
  * Author: Your Name
  * License: GPL2
  * Requires PHP: 8.0
@@ -12,7 +12,8 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 // Constants
-define( 'WCCRM_VERSION', '2.0.0' );
+define( 'WCCRM_VERSION', '0.5.0' );
+define( 'KSCRM_CACHE_DEFAULT_TTL', 3600 ); // 1 hour default cache TTL
 define( 'WCCRM_PLUGIN_FILE', __FILE__ );
 define( 'WCCRM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WCCRM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -99,6 +100,7 @@ register_deactivation_hook( __FILE__, 'wccrm_deactivate' );
 function wccrm_deactivate() {
     // Clear any scheduled events
     wp_clear_scheduled_hook( 'wccrm_cleanup_old_interests' );
+    wp_clear_scheduled_hook( 'kscrm_daily_retention_cleanup' );
     
     // Clean up transients
     delete_transient( 'wccrm_news_' );
