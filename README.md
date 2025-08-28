@@ -1,6 +1,6 @@
 # WooCommerce CRM Plugin
 
-A lightweight CRM integrated with WooCommerce featuring dynamic forms, contact management, multi-provider shipping, and news aggregation.
+A lightweight CRM integrated with WooCommerce featuring dynamic forms, contact management, multi-provider shipping, news aggregation, and enhanced security.
 
 ## Features
 
@@ -11,7 +11,8 @@ A lightweight CRM integrated with WooCommerce featuring dynamic forms, contact m
 - **Multi-Provider Shipping**: Extensible shipping rate collection from multiple carriers
 - **News Aggregation**: Multi-provider news feed aggregation (scaffold for NewsAPI, GNews, RSS)
 - **Security**: Encrypted credential management with environment variable support
-- **Elementor Integration**: Native Elementor widget for form display
+- **Elementor Integration**: Native Elementor widgets for forms and news display
+- **Enhanced Anti-Spam**: Honeypot protection, rate limiting, and timestamp validation
 - **Database Schema**: Versioned migrations with automatic upgrades
 
 ### Core Modules
@@ -80,13 +81,27 @@ define('WCCRM_GNEWS_KEY', 'your_gnews_key');
 ```php
 // Display a form
 [wccrm_form key="contact_form"]
+
+// Display news articles
+[kscrm_news limit="5" layout="list" show_date="true" show_source="true"]
+
+// News with cards layout
+[kscrm_news limit="10" layout="cards" show_excerpt="true" excerpt_length="200"]
 ```
 
-### Elementor Widget
+### Elementor Widgets
 
+#### WCCRM Form Widget
 1. Add "WCCRM Form" widget to your page
 2. Select a form from the dropdown
 3. Customize styling options
+
+#### KSCRM News Widget
+1. Add "KSCRM News" widget to your page
+2. Configure number of articles to display
+3. Choose between list or cards layout
+4. Toggle display of dates, sources, and excerpts
+5. Set excerpt length and cache duration
 
 ### Programmatic Usage
 
@@ -130,6 +145,47 @@ do_action('wccrm_debug_fetch_news');
 - PHP 8.0+
 - WordPress 5.0+
 - WooCommerce 3.0+ (for shipping features)
+- Elementor 3.0+ (for widget features)
+
+### Development Tooling
+
+#### Code Quality & Standards
+
+The project includes comprehensive development tooling:
+
+- **PHP_CodeSniffer**: WordPress coding standards compliance
+- **EditorConfig**: Consistent code formatting across editors
+- **Composer Scripts**: Easy linting and code fixing
+- **GitHub Actions**: Automated code quality checks
+
+#### Installing Development Dependencies
+
+```bash
+composer install
+```
+
+#### Running Code Quality Checks
+
+```bash
+# Run PHPCS linting
+composer run lint
+
+# Auto-fix code style issues
+composer run lint:fix
+
+# Manual PHPCS run with detailed output
+./vendor/bin/phpcs --standard=phpcs.xml.dist src/
+```
+
+#### Coding Standards
+
+The project follows WordPress coding standards with some modern PHP adaptations:
+
+- **WordPress Core, Extra, Docs**: Base standards
+- **WordPress VIP Minimum**: Performance and security standards
+- **PHPCompatibilityWP**: Cross-version PHP compatibility (8.0+)
+- **PSR-4**: Autoloading and namespace structure
+- **Short Array Syntax**: `[]` instead of `array()`
 
 ### PSR-4 Autoloading
 ```php
@@ -176,22 +232,47 @@ $plugin->get_news_aggregator()->getProviderRegistry()->register('my_provider', n
 
 ## Security
 
+### Enhanced Anti-Spam Protection
+
+The plugin includes comprehensive spam protection for lead submissions:
+
+- **Honeypot Fields**: Hidden fields that spam bots often fill out
+- **Timestamp Validation**: Minimum 3-second delay between form load and submission
+- **IP Rate Limiting**: Maximum 30 submissions per 10 minutes per IP address
+- **Optional Nonce Verification**: Can be enabled via filter for authenticated forms
+
+#### Enabling Nonce Protection
+
+```php
+// Enable nonce verification for lead submissions
+add_filter('kscrm_leads_nonce_enable', '__return_true');
+```
+
+Note: Nonce verification is disabled by default to allow unauthenticated external form submissions.
+
+### General Security Features
+
 - All form inputs are sanitized and validated
 - API keys stored with encryption using WordPress AUTH_KEY/SECURE_AUTH_KEY
-- Nonce verification for form submissions
 - SQL injection protection via $wpdb->prepare()
 - XSS protection via esc_html/esc_attr
+- Rate limiting prevents abuse of public endpoints
 
 ## TODO Items
 
-- [ ] Rate limiting for form submissions
-- [ ] Spam protection (honeypot fields)
+- [ ] ~~Rate limiting for form submissions~~ ✅ **Added in v0.5.0**
+- [ ] ~~Spam protection (honeypot fields)~~ ✅ **Added in v0.5.0**
 - [ ] Interest decay logic based on age
 - [ ] Admin capability checks for sensitive operations
-- [ ] News article caching for performance
+- [ ] News article caching for performance (basic caching implemented)
 - [ ] Logging system for debugging
 - [ ] Admin UI for form management
 - [ ] Import/export functionality
+- [ ] Unit test suite (PHPUnit + wp-env) for Cache_Manager, Rate_Limiter, Retention_Manager
+- [ ] Persist news snapshots to custom table
+- [ ] Implement EasyPost real API integration
+- [ ] Background prefetch + scheduling for news
+- [ ] Advanced dashboard charts and customer timeline
 
 ## Legacy Compatibility
 

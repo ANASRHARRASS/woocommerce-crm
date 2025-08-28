@@ -1,0 +1,64 @@
+name: PHP CodeSniffer
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**.php'
+      - 'phpcs.xml.dist'
+      - 'composer.json'
+      - '.github/workflows/phpcs.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '**.php'
+      - 'phpcs.xml.dist'
+      - 'composer.json'
+      - '.github/workflows/phpcs.yml'
+
+jobs:
+  phpcs:
+    name: PHP CodeSniffer
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php-version: ['8.0', '8.1', '8.2', '8.3']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        coverage: none
+        tools: composer
+
+    - name: Get Composer cache directory
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache Composer packages
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-composer-
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest --no-dev
+
+    - name: Install dev dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Run PHPCS
+      run: composer run-script lint
+
+    - name: Show PHPCS version
+      run: ./vendor/bin/phpcs --version
+
+    - name: Show PHPCS standards
+      run: ./vendor/bin/phpcs -i

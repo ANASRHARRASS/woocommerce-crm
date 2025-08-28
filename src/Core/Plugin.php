@@ -16,6 +16,8 @@ use Anas\WCCRM\Security\CredentialResolver;
 use Anas\WCCRM\Shipping\CarrierRegistry;
 use Anas\WCCRM\Shipping\RateService;
 use Anas\WCCRM\Shipping\Carriers\ExampleCarrier;
+use Anas\WCCRM\News\Aggregator;
+use Anas\WCCRM\News\ProviderRegistry;
 
 // Phase 2 services (skeletons only)
 use Anas\WCCRM\Orders\OrderSyncService;
@@ -79,6 +81,10 @@ class Plugin {
     protected ErasureService $erasureService;
     protected MetricsAggregator $metricsAggregator;
     protected DashboardController $dashboardController;
+    
+    // News aggregation
+    protected ProviderRegistry $newsProviderRegistry;
+    protected Aggregator $newsAggregator;
 
     public static function instance(): Plugin { return self::$instance ??= new self(); }
     private function __construct() {}
@@ -151,6 +157,10 @@ class Plugin {
         $this->metricsAggregator   = new MetricsAggregator(); // TODO aggregation queries
         $this->dashboardController = new DashboardController($this->metricsAggregator);
 
+        // News aggregation
+        $this->newsProviderRegistry = new ProviderRegistry();
+        $this->newsAggregator = new Aggregator($this->newsProviderRegistry);
+
         // Shipping (existing functionality preserved)
         $this->carrierRegistry = new CarrierRegistry();
         $this->rateService     = new RateService($this->carrierRegistry);
@@ -180,6 +190,11 @@ class Plugin {
 
         // Social webhooks REST
         add_action('rest_api_init', [$this->socialWebhookController, 'register_routes']);
+        
+        // Enhanced Leads REST endpoint with spam protection
+        if (class_exists('\\KS_CRM\\Leads\\Leads_REST')) {
+            new \KS_CRM\Leads\Leads_REST();
+        }
 
         // COD token expiry cron
         add_action('wccrm_cod_verification_expiry_check', [$this->codWorkflowService, 'expire_pending_tokens']);
@@ -195,7 +210,10 @@ class Plugin {
         add_action('wp_ajax_wccrm_fetch_metrics', [$this->dashboardController, 'ajax_fetch_metrics']);
     }
 
-    protected function register_shortcodes(): void { add_shortcode('wccrm_form', [$this, 'render_form_shortcode']); }
+    protected function register_shortcodes(): void { 
+        add_shortcode('wccrm_form', [$this, 'render_form_shortcode']); 
+        add_shortcode('kscrm_news', [$this, 'render_news_shortcode']); 
+    }
 
     protected function init_elementor(): void {
         if (did_action('elementor/loaded')) {
@@ -221,6 +239,117 @@ class Plugin {
         return $renderer->render($form);
     }
 
+    public function render_news_shortcode(array $atts): string {
+        $atts = shortcode_atts([
+            'limit' => 5,
+            'layout' => 'list', // 'list' or 'cards'
+            'show_date' => true,
+            'show_source' => true,
+            'show_excerpt' => true,
+            'excerpt_length' => 150,
+            'cache_duration' => 3600,
+        ], $atts);
+
+        $limit = max(1, min(50, intval($atts['limit'])));
+        $cache_duration = max(300, intval($atts['cache_duration'])); // Min 5 minutes
+
+        try {
+            $articles = $this->newsAggregator->get_cached(['limit' => $limit], $cache_duration);
+            
+            if (empty($articles)) {
+                return '<div class="kscrm-news-empty">No news articles available at the moment.</div>';
+            }
+
+            return $this->render_news_articles($articles, $atts);
+            
+        } catch (\Exception $e) {
+            error_log('KSCRM News shortcode error: ' . $e->getMessage());
+            return '<div class="kscrm-news-error">Unable to load news at this time.</div>';
+        }
+    }
+
+    protected function render_news_articles(array $articles, array $atts): string {
+        $layout = sanitize_text_field($atts['layout']);
+        $show_date = filter_var($atts['show_date'], FILTER_VALIDATE_BOOLEAN);
+        $show_source = filter_var($atts['show_source'], FILTER_VALIDATE_BOOLEAN);
+        $show_excerpt = filter_var($atts['show_excerpt'], FILTER_VALIDATE_BOOLEAN);
+        $excerpt_length = max(50, min(500, intval($atts['excerpt_length'])));
+
+        $html = '<div class="kscrm-news kscrm-news-' . esc_attr($layout) . '">';
+
+        foreach ($articles as $article) {
+            if (is_array($article)) {
+                // Convert cached array back to Article object
+                $article = new \Anas\WCCRM\News\DTO\Article($article);
+            }
+
+            $html .= '<article class="kscrm-news-item">';
+            
+            if ($layout === 'cards' && $article->get_image_url()) {
+                $html .= '<div class="kscrm-news-image">';
+                $html .= '<img src="' . esc_url($article->get_image_url()) . '" alt="' . esc_attr($article->title) . '" loading="lazy">';
+                $html .= '</div>';
+            }
+            
+            $html .= '<div class="kscrm-news-content">';
+            $html .= '<h3 class="kscrm-news-title">';
+            $html .= '<a href="' . esc_url($article->url) . '" target="_blank" rel="noopener">';
+            $html .= esc_html($article->title);
+            $html .= '</a>';
+            $html .= '</h3>';
+
+            if ($show_excerpt && $article->get_excerpt($excerpt_length)) {
+                $html .= '<p class="kscrm-news-excerpt">' . esc_html($article->get_excerpt($excerpt_length)) . '</p>';
+            }
+
+            $html .= '<div class="kscrm-news-meta">';
+            if ($show_source && $article->source) {
+                $html .= '<span class="kscrm-news-source">' . esc_html($article->source) . '</span>';
+            }
+            if ($show_date && $article->published_at) {
+                $formatted_date = date('F j, Y', strtotime($article->published_at));
+                $html .= '<time class="kscrm-news-date" datetime="' . esc_attr($article->published_at) . '">' . esc_html($formatted_date) . '</time>';
+            }
+            $html .= '</div>';
+            
+            $html .= '</div>'; // .kscrm-news-content
+            $html .= '</article>';
+        }
+
+        $html .= '</div>';
+
+        // Add basic styles if not already present
+        $html .= $this->get_news_styles();
+
+        return $html;
+    }
+
+    protected function get_news_styles(): string {
+        static $styles_added = false;
+        
+        if ($styles_added) {
+            return '';
+        }
+        
+        $styles_added = true;
+        
+        return '<style>
+        .kscrm-news { margin: 20px 0; }
+        .kscrm-news-item { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .kscrm-news-item:last-child { border-bottom: none; }
+        .kscrm-news-title { margin: 0 0 8px 0; font-size: 1.1em; }
+        .kscrm-news-title a { text-decoration: none; color: #0073aa; }
+        .kscrm-news-title a:hover { text-decoration: underline; }
+        .kscrm-news-excerpt { margin: 8px 0; color: #666; line-height: 1.5; }
+        .kscrm-news-meta { font-size: 0.9em; color: #999; }
+        .kscrm-news-source::after { content: " • "; }
+        .kscrm-news-cards .kscrm-news-item { display: flex; align-items: flex-start; gap: 15px; }
+        .kscrm-news-cards .kscrm-news-image { flex-shrink: 0; width: 120px; }
+        .kscrm-news-cards .kscrm-news-image img { width: 100%; height: auto; border-radius: 4px; }
+        .kscrm-news-error, .kscrm-news-empty { padding: 15px; background: #f8f9fa; border-left: 4px solid #ddd; color: #666; }
+        </style>';
+    }
+
     public function handle_form_submission(): void {
         $formKey = $_POST['__wccrm_form_key'] ?? '';
         if (!wp_verify_nonce($_POST['_wpnonce'] ?? '', 'wccrm_form_' . $formKey)) {
@@ -244,4 +373,6 @@ class Plugin {
     public function get_order_sync_service(): OrderSyncService { return $this->orderSyncService; }
     public function get_message_dispatcher(): MessageDispatcher { return $this->messageDispatcher; }
     public function get_automation_runner(): AutomationRunner { return $this->automationRunner; }
+    public function get_form_repository(): FormRepository { return $this->formRepository; }
+    public function get_news_aggregator(): Aggregator { return $this->newsAggregator; }
 }

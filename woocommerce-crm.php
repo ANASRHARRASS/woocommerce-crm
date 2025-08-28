@@ -33,10 +33,19 @@ if ( file_exists( WCCRM_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
     require_once WCCRM_PLUGIN_DIR . 'vendor/autoload.php';
 }
 
-// PSR-4 autoloader for our namespace
+// PSR-4 autoloader for our namespaces
 spl_autoload_register( function ( $class ) {
+    // Handle Anas\WCCRM namespace
     if ( strpos( $class, 'Anas\\WCCRM\\' ) === 0 ) {
         $path = WCCRM_PLUGIN_DIR . 'src/' . str_replace( [ '\\', 'Anas/WCCRM/' ], [ '/', '' ], substr( $class, 11 ) ) . '.php';
+        if ( file_exists( $path ) ) {
+            require_once $path;
+        }
+    }
+    
+    // Handle KS_CRM namespace 
+    if ( strpos( $class, 'KS_CRM\\' ) === 0 ) {
+        $path = WCCRM_PLUGIN_DIR . 'src/' . str_replace( [ '\\', 'KS_CRM/' ], [ '/', '' ], substr( $class, 7 ) ) . '.php';
         if ( file_exists( $path ) ) {
             require_once $path;
         }
@@ -60,6 +69,12 @@ function wccrm_init() {
     try {
         $plugin = \Anas\WCCRM\Core\Plugin::instance();
         $plugin->init();
+        
+        // Initialize Elementor integration when Elementor is loaded
+        if ( class_exists( '\KS_CRM\Elementor\Loader' ) ) {
+            \KS_CRM\Elementor\Loader::init();
+        }
+        
     } catch ( \Exception $e ) {
         add_action( 'admin_notices', function () use ( $e ) {
             echo '<div class="notice notice-error"><p>';

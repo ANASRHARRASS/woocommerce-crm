@@ -32,6 +32,9 @@ class ElementorLoader {
 
     public function register_widgets( $widgets_manager ): void {
         require_once __DIR__ . '/WidgetForm.php';
+        require_once __DIR__ . '/Widget_News.php';
+        
         $widgets_manager->register( new WidgetForm( $this->formRepository ) );
+        $widgets_manager->register( new Widget_News() );
     }
 }
