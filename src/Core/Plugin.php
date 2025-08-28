@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Main Plugin bootstrap (Phase 2 skeleton - News module removed per user request for now)
  */
@@ -44,7 +45,8 @@ use Anas\WCCRM\Reporting\DashboardController;
 
 defined('ABSPATH') || exit;
 
-class Plugin {
+class Plugin
+{
     private static ?Plugin $instance = null;
 
     // Core
@@ -79,21 +81,30 @@ class Plugin {
     protected ErasureService $erasureService;
     protected MetricsAggregator $metricsAggregator;
     protected DashboardController $dashboardController;
+    // Extended (Phase 3) services
+    protected ?\Anas\WCCRM\Activity\ActivityRepository $activityRepository = null;
+    protected ?\Anas\WCCRM\Messaging\Queue\MessageQueue $messageQueue = null;
 
-    public static function instance(): Plugin { return self::$instance ??= new self(); }
+    public static function instance(): Plugin
+    {
+        return self::$instance ??= new self();
+    }
     private function __construct() {}
 
-    public function init(): void {
+    public function init(): void
+    {
         $this->init_services();
         $this->register_core_hooks();
         $this->register_phase_hooks();
         $this->register_shortcodes();
         $this->init_elementor();
         $this->init_shipping();
+        $this->init_admin();
         do_action('wccrm_after_init', $this);
     }
 
-    protected function init_services(): void {
+    protected function init_services(): void
+    {
         // Core services
         $this->credentialResolver = new CredentialResolver();
         $this->formRepository     = new FormRepository();
@@ -112,7 +123,7 @@ class Plugin {
         // Messaging (Phase 2C #10)
         $this->templateRepository      = new TemplateRepository(); // TODO DB storage of templates
         $this->messagingConsentManager = new MessagingConsentManager(); // TODO consent logic
-        $this->messageDispatcher       = new MessageDispatcher($this->templateRepository, $this->messagingConsentManager);
+        $this->messageDispatcher       = new MessageDispatcher($this->templateRepository, $this->messagingConsentManager, $this->messageQueue);
         $this->messagingManager        = new MessagingManager($this->messageDispatcher);
 
         // Social Leads (Phase 2D #11)
@@ -151,6 +162,17 @@ class Plugin {
         $this->metricsAggregator   = new MetricsAggregator(); // TODO aggregation queries
         $this->dashboardController = new DashboardController($this->metricsAggregator);
 
+        // Extended services (only if classes exist to avoid autoload issues)
+        if (class_exists('Anas\\WCCRM\\Activity\\ActivityRepository')) {
+            $this->activityRepository = new \Anas\WCCRM\Activity\ActivityRepository();
+        }
+        if (class_exists('Anas\\WCCRM\\Messaging\\Queue\\MessageQueue')) {
+            $this->messageQueue = new \Anas\WCCRM\Messaging\Queue\MessageQueue();
+        }
+        // Hooks to invalidate metrics cache when data changes
+        add_action('wccrm_consent_recorded', ['\\Anas\\WCCRM\\Reporting\\MetricsAggregator', 'invalidate_cache']);
+        add_action('wccrm_form_version_created', ['\\Anas\\WCCRM\\Reporting\\MetricsAggregator', 'invalidate_cache']);
+
         // Shipping (existing functionality preserved)
         $this->carrierRegistry = new CarrierRegistry();
         $this->rateService     = new RateService($this->carrierRegistry);
@@ -163,13 +185,21 @@ class Plugin {
         do_action('wccrm_services_initialized', $this);
     }
 
-    protected function register_core_hooks(): void {
+    protected function register_core_hooks(): void
+    {
         add_action('init', [$this, 'maybe_upgrade']);
         add_action('wp_ajax_wccrm_form_submit', [$this, 'handle_form_submission']);
         add_action('wp_ajax_nopriv_wccrm_form_submit', [$this, 'handle_form_submission']);
+        add_filter('cron_schedules', function ($s) {
+            if (!isset($s['five_minutes'])) {
+                $s['five_minutes'] = ['interval' => 300, 'display' => __('Every Five Minutes', 'woocommerce-crm')];
+            }
+            return $s;
+        });
     }
 
-    protected function register_phase_hooks(): void {
+    protected function register_phase_hooks(): void
+    {
         // Orders hooks
         add_action('woocommerce_new_order', [$this->orderSyncService, 'handle_new_order']);
         add_action('woocommerce_order_status_changed', [$this->orderSyncService, 'handle_status_change'], 10, 4);
@@ -177,6 +207,9 @@ class Plugin {
 
         // Messaging queue cron placeholder
         add_action('wccrm_dispatch_outbound_queue', [$this->messageDispatcher, 'process_queue']);
+        if (! wp_next_scheduled('wccrm_dispatch_outbound_queue')) {
+            wp_schedule_event(time() + 60, 'five_minutes', 'wccrm_dispatch_outbound_queue');
+        }
 
         // Social webhooks REST
         add_action('rest_api_init', [$this->socialWebhookController, 'register_routes']);
@@ -195,20 +228,49 @@ class Plugin {
         add_action('wp_ajax_wccrm_fetch_metrics', [$this->dashboardController, 'ajax_fetch_metrics']);
     }
 
-    protected function register_shortcodes(): void { add_shortcode('wccrm_form', [$this, 'render_form_shortcode']); }
+    protected function register_shortcodes(): void
+    {
+        add_shortcode('wccrm_form', [$this, 'render_form_shortcode']);
+    }
 
-    protected function init_elementor(): void {
+    protected function init_elementor(): void
+    {
         if (did_action('elementor/loaded')) {
             require_once WCCRM_PLUGIN_DIR . 'src/Elementor/ElementorLoader.php';
             new \Anas\WCCRM\Elementor\ElementorLoader($this->formRepository);
         }
     }
 
-    protected function init_shipping(): void { add_filter('woocommerce_shipping_methods', [$this, 'register_shipping_method']); }
+    protected function init_shipping(): void
+    {
+        add_filter('woocommerce_shipping_methods', [$this, 'register_shipping_method']);
+    }
 
-    public function maybe_upgrade(): void { (new Installer())->maybe_upgrade(); }
+    /**
+     * Register admin dashboard/menu (lightweight initial implementation).
+     */
+    protected function init_admin(): void
+    {
+        if (! is_admin()) {
+            return;
+        }
+        // Lazy load file if it exists; keeps class optional for now.
+        $dashboard_file = WCCRM_PLUGIN_DIR . 'src/Admin/Dashboard.php';
+        if (file_exists($dashboard_file)) {
+            require_once $dashboard_file;
+            if (class_exists('Anas\\WCCRM\\Admin\\Dashboard')) {
+                new \Anas\WCCRM\Admin\Dashboard($this);
+            }
+        }
+    }
 
-    public function render_form_shortcode(array $atts): string {
+    public function maybe_upgrade(): void
+    {
+        (new Installer())->maybe_upgrade();
+    }
+
+    public function render_form_shortcode(array $atts): string
+    {
         $atts = shortcode_atts(['key' => ''], $atts);
         if (empty($atts['key'])) {
             return '<div class="wccrm-error">Form key is required.</div>';
@@ -221,7 +283,8 @@ class Plugin {
         return $renderer->render($form);
     }
 
-    public function handle_form_submission(): void {
+    public function handle_form_submission(): void
+    {
         $formKey = $_POST['__wccrm_form_key'] ?? '';
         if (!wp_verify_nonce($_POST['_wpnonce'] ?? '', 'wccrm_form_' . $formKey)) {
             wp_die('Security check failed');
@@ -234,14 +297,40 @@ class Plugin {
         wp_send_json_error($result);
     }
 
-    public function register_shipping_method(array $methods): array {
+    public function register_shipping_method(array $methods): array
+    {
         require_once WCCRM_PLUGIN_DIR . 'src/Shipping/WCCRM_Shipping_Method.php';
         $methods['wccrm_shipping'] = 'WCCRM_Shipping_Method';
         return $methods;
     }
 
     // Getters (extend as required later)
-    public function get_order_sync_service(): OrderSyncService { return $this->orderSyncService; }
-    public function get_message_dispatcher(): MessageDispatcher { return $this->messageDispatcher; }
-    public function get_automation_runner(): AutomationRunner { return $this->automationRunner; }
+    public function get_order_sync_service(): OrderSyncService
+    {
+        return $this->orderSyncService;
+    }
+    public function get_message_dispatcher(): MessageDispatcher
+    {
+        return $this->messageDispatcher;
+    }
+    public function get_automation_runner(): AutomationRunner
+    {
+        return $this->automationRunner;
+    }
+    public function get_metrics(): MetricsAggregator
+    {
+        return $this->metricsAggregator;
+    }
+    public function get_contacts(): ContactRepository
+    {
+        return $this->contactRepository;
+    }
+    public function get_activity_repository()
+    {
+        return $this->activityRepository;
+    }
+    public function get_message_queue()
+    {
+        return $this->messageQueue;
+    }
 }
