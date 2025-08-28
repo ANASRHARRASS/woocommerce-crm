@@ -1,0 +1,231 @@
+# Copyright (C) 2024 WooCommerce CRM Plugin
+# This file is distributed under the GPL2.
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce CRM Plugin 0.5.0\n"
+"Report-Msgid-Bugs-To: https://github.com/ANASRHARRASS/woocommerce-crm\n"
+"POT-Creation-Date: 2024-01-01 00:00:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: src/KS_CRM/Admin/Tools_Page.php:34
+msgid "WooCommerce CRM Tools"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:35
+msgid "CRM Tools"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:56
+msgid "Export started..."
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:57
+msgid "Export completed!"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:58
+msgid "Export failed. Please try again."
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:59
+msgid "Are you sure you want to clear all cache?"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:79
+msgid "WooCommerce CRM Tools"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:85
+msgid "Data Export"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:86
+msgid "Export your CRM data for backup or analysis."
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:90
+msgid "Export Leads (CSV)"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:94
+msgid "Export UTM Analytics (CSV)"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:98
+msgid "Export News Snapshot (JSON)"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:110
+msgid "Cache Management"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:111
+msgid "Manage cached data to improve performance or troubleshoot issues."
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:117
+msgid "Cache Actions"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:120
+msgid "Clear News Cache"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:124
+msgid "Clear Shipping Cache"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:129
+msgid "Clear All Cache"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:137
+msgid "Data Retention"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:138
+msgid "Configure how long to keep different types of data."
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:146
+msgid "Retain Leads (months)"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:152
+msgid "How many months to keep lead data before automatic cleanup."
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:158
+msgid "Retain UTM Stats (days)"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:164
+msgid "How many days to keep UTM analytics data."
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:170
+msgid "Update Retention Settings"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:176
+msgid "System Information"
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:177
+msgid "System status and configuration information."
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:202
+msgid "News cache cleared successfully."
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:207
+msgid "Shipping cache cleared successfully."
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:212
+msgid "All cache cleared successfully."
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:227
+msgid "Retention settings updated successfully."
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:238
+msgid "Insufficient permissions."
+msgstr ""
+
+#: src/KS_CRM/Admin/Tools_Page.php:248
+msgid "Export ready for download."
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:115
+msgid "Cart Share"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:116
+msgid "Template for sharing cart contents via WhatsApp"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:121
+msgid "Order Confirmation"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:122
+msgid "Template for order confirmation messages"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:127
+msgid "Product Inquiry"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:128
+msgid "Template for product inquiry messages"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:133
+msgid "Shipping Update"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:134
+msgid "Template for shipping status updates"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:139
+msgid "Abandoned Cart"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:140
+msgid "Template for abandoned cart reminders"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:145
+msgid "Promotional"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:146
+msgid "Template for promotional messages"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:151
+msgid "Customer Support"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:152
+msgid "Template for customer support responses"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:157
+msgid "Welcome Message"
+msgstr ""
+
+#: src/KS_CRM/WhatsApp/Templates.php:158
+msgid "Template for welcome messages to new customers"
+msgstr ""
+
+#: woocommerce-crm.php:23
+msgid "WooCommerce CRM requires PHP 8.0 or higher. Please update your PHP version."
+msgstr ""
+
+#: woocommerce-crm.php:53
+msgid "WooCommerce CRM: WooCommerce not active – some features may be limited."
+msgstr ""
+
+#: woocommerce-crm.php:65
+msgid "WooCommerce CRM: Initialization failed: "
+msgstr ""
+
+#: woocommerce-crm.php:88
+msgid "WooCommerce CRM activation failed: "
+msgstr ""
+
+#: woocommerce-crm.php:89
+msgid "Plugin Activation Error"
+msgstr ""

@@ -1,3 +1,9 @@
+/**
+ * WooCommerce CRM Admin Styles
+ * Base styles and enhanced styles for tools page and dashboard
+ */
+
+/* Base Styles */
 body {
     background-color: #f9f9f9;
     font-family: Arial, sans-serif;
@@ -61,4 +67,129 @@ h1, h2, h3 {
 .error {
     color: red;
     font-size: 0.9em;
+}
+
+/* Tools Page Styles */
+.kscrm-tools-container {
+    max-width: 1200px;
+}
+
+.kscrm-tools-section {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 4px;
+}
+
+.kscrm-tools-section h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.kscrm-export-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+}
+
+.kscrm-export-btn {
+    min-width: 200px;
+}
+
+.kscrm-export-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Progress Bar Styles */
+.kscrm-progress {
+    margin: 20px 0;
+    display: none;
+}
+
+.kscrm-progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #f1f1f1;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.kscrm-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0073aa, #00a0d2);
+    border-radius: 10px;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.kscrm-progress-text {
+    margin-top: 10px;
+    font-weight: 500;
+    color: #555;
+}
+
+/* Dashboard Enhancements */
+.kscrm-dashboard-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.kscrm-dashboard-widget {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    padding: 20px;
+    border-radius: 4px;
+}
+
+.kscrm-metric-card {
+    background: #f8f9fa;
+    border-left: 4px solid #0073aa;
+    padding: 15px;
+    margin: 10px 0;
+}
+
+.kscrm-metric-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #0073aa;
+    margin-bottom: 5px;
+}
+
+.kscrm-metric-label {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Date Range Selector */
+.kscrm-date-range-selector {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .kscrm-export-buttons {
+        flex-direction: column;
+    }
+    
+    .kscrm-export-btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .kscrm-dashboard-container {
+        grid-template-columns: 1fr;
+    }
 }
