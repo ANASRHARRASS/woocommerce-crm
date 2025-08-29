@@ -4,6 +4,8 @@ namespace Anas\WCCRM\Forms;
 
 use Anas\WCCRM\Contacts\ContactRepository;
 use Anas\WCCRM\Contacts\InterestUpdater;
+use Anas\WCCRM\Contacts\TagRepository;
+use Anas\WCCRM\Contacts\ContactTagService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -14,10 +16,14 @@ class FormSubmissionLinker {
 
     private ContactRepository $contactRepository;
     private InterestUpdater $interestUpdater;
+    private ?ContactTagService $tagService = null;
 
     public function __construct( ContactRepository $contactRepository, InterestUpdater $interestUpdater ) {
         $this->contactRepository = $contactRepository;
         $this->interestUpdater = $interestUpdater;
+        if ( class_exists('Anas\\WCCRM\\Contacts\\TagRepository') ) {
+            $this->tagService = new ContactTagService(new TagRepository());
+        }
     }
 
     /**
@@ -59,6 +65,14 @@ class FormSubmissionLinker {
             $submission_data, 
             $submission['form_key'] 
         );
+
+        // Derive & assign tags
+        if ( $this->tagService ) {
+            $tags = $this->tagService->derive_tags( $submission['form_key'], $submission_data );
+            if ( $tags ) {
+                $this->tagService->assign_tags( $contact_id, $tags );
+            }
+        }
 
         do_action( 'wccrm_submission_linked_to_contact', $submission_id, $contact_id, $submission_data );
     }
