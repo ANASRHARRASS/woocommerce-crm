@@ -39,7 +39,12 @@ class FormRepository {
         }
 
         $insert_data['id'] = $wpdb->insert_id;
-        return new FormModel( $insert_data );
+        $model = new FormModel( $insert_data );
+        // Sync normalized fields
+        if ( class_exists('Anas\\WCCRM\\Forms\\FieldRepository') ) {
+            ( new FieldRepository() )->sync_from_schema( $model );
+        }
+        return $model;
     }
 
     public function update( int $id, array $data ): ?FormModel {
@@ -73,7 +78,11 @@ class FormRepository {
             return null;
         }
 
-        return $this->load_by_id( $id );
+        $model = $this->load_by_id( $id );
+        if ( $model && isset( $data['schema'] ) && class_exists('Anas\\WCCRM\\Forms\\FieldRepository') ) {
+            ( new FieldRepository() )->sync_from_schema( $model );
+        }
+        return $model;
     }
 
     public function delete( int $id ): bool {

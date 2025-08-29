@@ -14,7 +14,15 @@ class FormRenderer {
             return '<div class="wccrm-error">Form is not active.</div>';
         }
 
-        $fields = $form->get_fields();
+        // Prefer normalized fields (gives product/context overrides later) if FieldRepository exists
+        $fields = [];
+        if ( class_exists('Anas\\WCCRM\\Forms\\FieldRepository') ) {
+            $repo = new FieldRepository();
+            $fields = $repo->get_fields_for_form( $form->id );
+        }
+        if ( empty( $fields ) ) {
+            $fields = $form->get_fields();
+        }
         if ( empty( $fields ) ) {
             return '<div class="wccrm-error">Form has no fields configured.</div>';
         }
