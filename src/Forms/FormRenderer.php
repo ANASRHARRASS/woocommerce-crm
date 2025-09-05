@@ -2,152 +2,205 @@
 
 namespace Anas\WCCRM\Forms;
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
 /**
  * Form renderer for generating HTML output
  */
-class FormRenderer {
+class FormRenderer
+{
 
-    public function render( FormModel $form ): string {
-        if ( ! $form->is_active() ) {
+    public function render(FormModel $form): string
+    {
+        if (! $form->is_active()) {
             return '<div class="wccrm-error">Form is not active.</div>';
         }
 
         // Prefer normalized fields (gives product/context overrides later) if FieldRepository exists
         $fields = [];
-        if ( class_exists('Anas\\WCCRM\\Forms\\FieldRepository') ) {
+        if (class_exists('Anas\\WCCRM\\Forms\\FieldRepository')) {
             $repo = new FieldRepository();
-            $fields = $repo->get_fields_for_form( $form->id );
+            $fields = $repo->get_fields_for_form($form->id);
+            // Merge category then product variant overrides if on a product page
+            if (function_exists('is_singular') && is_singular('product')) {
+                $pid = get_queried_object_id();
+                if ($pid) {
+                    // Category variants
+                    if (class_exists('Anas\\WCCRM\\Forms\\FormCategoryVariantRepository')) {
+                        $term_ctx = [];
+                        $terms = get_the_terms($pid, 'product_cat');
+                        if (is_array($terms)) {
+                            // Build deterministic order: parent categories first (broad) then children (specific)
+                            // Simple approach: sort by term_id ascending
+                            usort($terms, function ($a, $b) {
+                                return $a->term_id <=> $b->term_id;
+                            });
+                            foreach ($terms as $t) {
+                                $term_ctx[] = ['term_id' => (int)$t->term_id, 'taxonomy' => $t->taxonomy];
+                            }
+                        }
+                        if ($term_ctx) {
+                            $catRepo = new FormCategoryVariantRepository();
+                            $catVariantFields = $catRepo->get_variant_fields($form->id, $term_ctx);
+                            if ($catVariantFields) {
+                                $fields = $catRepo->merge_fields($fields, $catVariantFields);
+                            }
+                        }
+                    }
+                    // Product variant overrides (highest precedence)
+                    if (class_exists('Anas\\WCCRM\\Forms\\FormVariantRepository')) {
+                        $variantRepo = new FormVariantRepository();
+                        $variantFields = $variantRepo->get_variant_fields($form->id, (int)$pid);
+                        if ($variantFields) {
+                            $fields = $variantRepo->merge_fields($fields, $variantFields);
+                        }
+                    }
+                }
+            }
         }
-        if ( empty( $fields ) ) {
+        if (empty($fields)) {
             $fields = $form->get_fields();
         }
-        if ( empty( $fields ) ) {
+        if (empty($fields)) {
             return '<div class="wccrm-error">Form has no fields configured.</div>';
         }
 
         $settings = $form->get_settings();
-        $form_class = 'wccrm-form wccrm-form-' . esc_attr( $form->form_key );
-        
-        $html = '<form class="' . esc_attr( $form_class ) . '" method="post" data-form-key="' . esc_attr( $form->form_key ) . '">';
-        
+        $form_class = 'wccrm-form wccrm-form-' . esc_attr($form->form_key);
+
+        $html = '<form class="' . esc_attr($form_class) . '" method="post" data-form-key="' . esc_attr($form->form_key) . '">';
+
         // Add nonce for security
-        $html .= wp_nonce_field( 'wccrm_form_' . $form->form_key, '_wpnonce', true, false );
-        
+        $html .= wp_nonce_field('wccrm_form_' . $form->form_key, '_wpnonce', true, false);
+
         // Hidden form key field
-        $html .= '<input type="hidden" name="__wccrm_form_key" value="' . esc_attr( $form->form_key ) . '" />';
-        
+        $html .= '<input type="hidden" name="__wccrm_form_key" value="' . esc_attr($form->form_key) . '" />';
+
+        // Honeypot & timestamp (spam protection)
+        $html .= '<input type="text" name="__wccrm_hp" value="" style="display:none" tabindex="-1" autocomplete="off" />';
+        $html .= '<input type="hidden" name="__wccrm_ts" value="' . esc_attr(time()) . '" />';
+
         // Render fields
-        foreach ( $fields as $field ) {
-            $html .= $this->render_field( $field );
+        foreach ($fields as $field) {
+            $html .= $this->render_field($field);
         }
-        
+
         // Submit button
-        $submit_text = esc_html( $settings['submit_text'] ?? 'Submit' );
+        $submit_text = esc_html($settings['submit_text'] ?? 'Submit');
         $html .= '<div class="wccrm-field-group">';
         $html .= '<button type="submit" class="wccrm-submit-btn">' . $submit_text . '</button>';
         $html .= '</div>';
-        
+
         $html .= '</form>';
-        
+
         // Add basic styling and JavaScript
         $html .= $this->get_form_styles();
         $html .= $this->get_form_scripts();
-        
+
         return $html;
     }
 
-    protected function render_field( array $field ): string {
+    protected function render_field(array $field): string
+    {
         $type = $field['type'] ?? 'text';
         $name = $field['name'] ?? '';
         $label = $field['label'] ?? '';
-        $required = ! empty( $field['required'] );
+        $required = ! empty($field['required']);
         $placeholder = $field['placeholder'] ?? '';
-        
-        if ( empty( $name ) ) {
+
+        if (empty($name)) {
             return '<!-- Invalid field: missing name -->';
         }
-        
-        $field_id = 'wccrm_field_' . sanitize_key( $name );
-        $field_class = 'wccrm-field wccrm-field-' . esc_attr( $type );
-        if ( $required ) {
+
+        $field_id = 'wccrm_field_' . sanitize_key($name);
+        $field_class = 'wccrm-field wccrm-field-' . esc_attr($type);
+        if ($required) {
             $field_class .= ' wccrm-field-required';
         }
-        
+
         $html = '<div class="wccrm-field-group">';
-        
+
         // Label
-        if ( ! empty( $label ) ) {
-            $html .= '<label for="' . esc_attr( $field_id ) . '" class="wccrm-field-label">';
-            $html .= esc_html( $label );
-            if ( $required ) {
+        if (! empty($label)) {
+            $html .= '<label for="' . esc_attr($field_id) . '" class="wccrm-field-label">';
+            $html .= esc_html($label);
+            if ($required) {
                 $html .= ' <span class="wccrm-required">*</span>';
             }
             $html .= '</label>';
         }
-        
+
         // Field input
-        switch ( $type ) {
+        switch ($type) {
             case 'email':
-                $html .= '<input type="email" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $name ) . '" class="' . esc_attr( $field_class ) . '"';
-                if ( $placeholder ) $html .= ' placeholder="' . esc_attr( $placeholder ) . '"';
-                if ( $required ) $html .= ' required';
+                $html .= '<input type="email" id="' . esc_attr($field_id) . '" name="' . esc_attr($name) . '" class="' . esc_attr($field_class) . '"';
+                if ($placeholder) $html .= ' placeholder="' . esc_attr($placeholder) . '"';
+                if ($required) $html .= ' required';
                 $html .= ' />';
                 break;
-                
+
             case 'tel':
-                $html .= '<input type="tel" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $name ) . '" class="' . esc_attr( $field_class ) . '"';
-                if ( $placeholder ) $html .= ' placeholder="' . esc_attr( $placeholder ) . '"';
-                if ( $required ) $html .= ' required';
+                $html .= '<input type="tel" id="' . esc_attr($field_id) . '" name="' . esc_attr($name) . '" class="' . esc_attr($field_class) . '"';
+                if ($placeholder) $html .= ' placeholder="' . esc_attr($placeholder) . '"';
+                if ($required) $html .= ' required';
                 $html .= ' />';
                 break;
-                
+
             case 'textarea':
-                $rows = (int) ( $field['rows'] ?? 4 );
-                $html .= '<textarea id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $name ) . '" class="' . esc_attr( $field_class ) . '" rows="' . $rows . '"';
-                if ( $placeholder ) $html .= ' placeholder="' . esc_attr( $placeholder ) . '"';
-                if ( $required ) $html .= ' required';
+                $rows = (int) ($field['rows'] ?? 4);
+                $html .= '<textarea id="' . esc_attr($field_id) . '" name="' . esc_attr($name) . '" class="' . esc_attr($field_class) . '" rows="' . $rows . '"';
+                if ($placeholder) $html .= ' placeholder="' . esc_attr($placeholder) . '"';
+                if ($required) $html .= ' required';
                 $html .= '></textarea>';
                 break;
-                
+
             case 'select':
                 $options = $field['options'] ?? [];
-                $html .= '<select id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $name ) . '" class="' . esc_attr( $field_class ) . '"';
-                if ( $required ) $html .= ' required';
+                $html .= '<select id="' . esc_attr($field_id) . '" name="' . esc_attr($name) . '" class="' . esc_attr($field_class) . '"';
+                if ($required) $html .= ' required';
                 $html .= '>';
-                
-                if ( $placeholder ) {
-                    $html .= '<option value="">' . esc_html( $placeholder ) . '</option>';
+
+                if ($placeholder) {
+                    $html .= '<option value="">' . esc_html($placeholder) . '</option>';
                 }
-                
-                foreach ( $options as $option ) {
+
+                foreach ($options as $option) {
                     $value = $option['value'] ?? '';
                     $label = $option['label'] ?? $value;
-                    $html .= '<option value="' . esc_attr( $value ) . '">' . esc_html( $label ) . '</option>';
+                    $html .= '<option value="' . esc_attr($value) . '">' . esc_html($label) . '</option>';
                 }
                 $html .= '</select>';
                 break;
-                
+
             case 'hidden':
                 $value = $field['value'] ?? '';
-                $html .= '<input type="hidden" name="' . esc_attr( $name ) . '" value="' . esc_attr( $value ) . '" />';
+                $html .= '<input type="hidden" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '" />';
                 break;
-                
+
+            case 'current_product_id':
+                if (function_exists('is_singular') && is_singular('product')) {
+                    $pid = get_queried_object_id();
+                    $html .= '<input type="hidden" name="' . esc_attr($name) . '" value="' . esc_attr($pid) . '" />';
+                } else {
+                    $html .= '<input type="hidden" name="' . esc_attr($name) . '" value="" />';
+                }
+                break;
+
             default: // 'text'
-                $html .= '<input type="text" id="' . esc_attr( $field_id ) . '" name="' . esc_attr( $name ) . '" class="' . esc_attr( $field_class ) . '"';
-                if ( $placeholder ) $html .= ' placeholder="' . esc_attr( $placeholder ) . '"';
-                if ( $required ) $html .= ' required';
+                $html .= '<input type="text" id="' . esc_attr($field_id) . '" name="' . esc_attr($name) . '" class="' . esc_attr($field_class) . '"';
+                if ($placeholder) $html .= ' placeholder="' . esc_attr($placeholder) . '"';
+                if ($required) $html .= ' required';
                 $html .= ' />';
                 break;
         }
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
 
-    protected function get_form_styles(): string {
+    protected function get_form_styles(): string
+    {
         return '
         <style>
         .wccrm-form { max-width: 600px; margin: 20px 0; }
@@ -163,7 +216,8 @@ class FormRenderer {
         </style>';
     }
 
-    protected function get_form_scripts(): string {
+    protected function get_form_scripts(): string
+    {
         return '
         <script>
         (function() {

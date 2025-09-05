@@ -17,6 +17,7 @@ A lightweight CRM integrated with WooCommerce featuring dynamic forms, contact m
 ### Core Modules
 
 #### Forms System (`src/Forms/`)
+
 - `FormModel`: Value object for form data
 - `FormRepository`: CRUD operations for forms
 - `FormRenderer`: HTML generation with built-in styling and JavaScript
@@ -24,19 +25,23 @@ A lightweight CRM integrated with WooCommerce featuring dynamic forms, contact m
 - `FormSubmissionLinker`: Links submissions to contacts and manages interests
 
 #### Contacts & Interests (`src/Contacts/`)
+
 - `ContactRepository`: Contact CRUD with email/phone-based upserts
 - `InterestUpdater`: Weight-based interest tracking with content analysis
 
 #### Security (`src/Security/`)
+
 - `CredentialResolver`: Secure API key management with encryption
 
 #### Shipping (`src/Shipping/`)
+
 - `ShippingCarrierInterface`: Interface for carrier implementations
 - `RateService`: Multi-carrier rate aggregation
 - `CarrierRegistry`: Carrier registration and management
 - WooCommerce shipping method integration
 
 #### News (`src/News/`)
+
 - `NewsProviderInterface`: Interface for news providers
 - `Aggregator`: Multi-provider article collection with deduplication
 - Stub providers for NewsAPI, GNews, and Generic RSS
@@ -106,32 +111,55 @@ do_action('wccrm_debug_fetch_news');
 ## Database Schema
 
 ### Forms (`wccrm_forms`)
+
 - Dynamic form definitions with JSON schema
 - Support for text, email, tel, select, textarea, hidden fields
 - Form status management (active/inactive)
 
 ### Contacts (`wccrm_contacts`)
+
 - Contact information with email/phone identifiers
 - Automatic upserts prevent duplicates
 
 ### Contact Interests (`wccrm_contact_interests`)
+
 - Weight-based interest scoring
 - Automatic interest detection from form submissions
 - TODO: Interest decay logic for aging data
 
 ### Form Submissions (`wccrm_form_submissions`)
+
 - Complete submission data with contact linking
 - IP and user agent tracking for security
 - JSON storage for flexible data structure
 
+### 3.4.0 Migration Notes (Category Form Variants)
+
+Version 3.4.0 introduces category (taxonomy term) based form field variants:
+
+- New table: `wccrm_form_category_variants` with columns `(id, form_id, term_id, taxonomy, variant_schema_json, created_at)`.
+- Renderer precedence when displaying a form on a product page:
+    1. Base normalized fields
+    2. Category variants (broad to specific order by term_id asc)
+    3. Product-specific variant (highest precedence)
+- Schema version bumped to `3.4.0`; automatic upgrade creates the table. If the table is missing, run: deactivate & reactivate plugin or invoke `wp wccrm check` to confirm.
+- Admin UI endpoints forthcoming for CRUD management (see roadmap) allowing selection of product categories and override field definitions.
+
+Caching Recommendation:
+Add a transient (e.g., `set_transient('wccrm_form_cat_variants_'.$form_id.'_'.$product_id, $merged, 300)`) after merging variants for high-traffic catalogs. Clear on variant CRUD operations.
+
+Rollback: Removing category variant support requires dropping the table and reverting `CURRENT_SCHEMA_VERSION` (not recommended in production).
+
 ## Development
 
 ### Requirements
+
 - PHP 8.0+
 - WordPress 5.0+
 - WooCommerce 3.0+ (for shipping features)
 
 ### PSR-4 Autoloading
+
 ```php
 "autoload": {
     "psr-4": {
@@ -196,6 +224,7 @@ $plugin->get_news_aggregator()->getProviderRegistry()->register('my_provider', n
 ## Legacy Compatibility
 
 The plugin maintains backward compatibility with v1.x:
+
 - Legacy `wcp_leads` table preserved
 - `wcp_log()` function available
 - Deprecated function notices guide migration

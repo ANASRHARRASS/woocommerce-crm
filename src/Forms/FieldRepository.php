@@ -54,7 +54,7 @@ class FieldRepository
                     'created_at'  => current_time('mysql'),
                     'updated_at'  => current_time('mysql'),
                 ],
-                ['%d','%s','%s','%s','%d','%s','%d','%s','%s']
+                ['%d', '%s', '%s', '%s', '%d', '%s', '%d', '%s', '%s']
             );
             $field_id = (int)$wpdb->insert_id;
             if ($field_id && $type === 'select') {
@@ -70,7 +70,7 @@ class FieldRepository
                             'opt_label' => sanitize_text_field($opt['label'] ?? $val),
                             'sort'      => (int)$sort,
                         ],
-                        ['%d','%s','%s','%d']
+                        ['%d', '%s', '%s', '%d']
                     );
                 }
             }

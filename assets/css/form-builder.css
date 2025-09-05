@@ -1,0 +1,249 @@
+/* WooCommerce CRM Form Builder Styles */
+
+.wccrm-product-form {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e1e1e1;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.wccrm-form-section {
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.wccrm-form-section:last-child {
+    border-bottom: none;
+}
+
+.wccrm-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0073aa;
+}
+
+.wccrm-field-wrapper {
+    margin-bottom: 15px;
+}
+
+.wccrm-field-label {
+    display: block;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.wccrm-field-label .required {
+    color: #d63638;
+    margin-left: 3px;
+}
+
+.wccrm-field-input,
+.wccrm-field-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.wccrm-field-input:focus,
+.wccrm-field-select:focus {
+    outline: none;
+    border-color: #0073aa;
+    box-shadow: 0 0 0 2px rgba(0, 115, 170, 0.2);
+}
+
+.wccrm-field-input[readonly] {
+    background-color: #f5f5f5;
+    color: #666;
+}
+
+.wccrm-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.wccrm-radio-label,
+.wccrm-checkbox-label {
+    display: flex;
+    align-items: center;
+    font-weight: normal;
+    cursor: pointer;
+    padding: 5px 0;
+}
+
+.wccrm-radio-label input,
+.wccrm-checkbox-label input {
+    margin-right: 8px;
+    width: auto;
+}
+
+.wccrm-field-description {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.wccrm-submit-btn {
+    background: #0073aa;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.wccrm-submit-btn:hover {
+    background: #005a87;
+}
+
+.wccrm-submit-btn:active {
+    transform: translateY(1px);
+}
+
+/* Morocco-specific styling */
+.wccrm-morocco-field {
+    position: relative;
+}
+
+.wccrm-morocco-field::before {
+    content: "🇲🇦";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+}
+
+/* Premium style variants */
+.wccrm-form-style-premium .wccrm-product-form {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.wccrm-form-style-premium .wccrm-field-input,
+.wccrm-form-style-premium .wccrm-field-select {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+}
+
+.wccrm-form-style-premium .wccrm-section-title {
+    color: white;
+    border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
+.wccrm-form-style-minimal .wccrm-product-form {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+}
+
+.wccrm-form-style-minimal .wccrm-field-input,
+.wccrm-form-style-minimal .wccrm-field-select {
+    border: none;
+    border-bottom: 2px solid #ddd;
+    border-radius: 0;
+    background: transparent;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .wccrm-product-form {
+        margin: 10px;
+        padding: 15px;
+    }
+
+    .wccrm-radio-group {
+        flex-direction: column;
+    }
+
+    .wccrm-section-title {
+        font-size: 16px;
+    }
+}
+
+/* Animation for form submission */
+.wccrm-form-submitting {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.wccrm-form-submitting .wccrm-submit-btn::after {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-left: 10px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: wccrm-spin 1s ease-in-out infinite;
+}
+
+@keyframes wccrm-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Success/Error messages */
+.wccrm-message {
+    padding: 10px 15px;
+    margin: 15px 0;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.wccrm-message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.wccrm-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Product info section styling */
+.wccrm-product-info {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.wccrm-product-info .wccrm-field-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.wccrm-product-info .wccrm-field-label {
+    font-weight: 600;
+    margin-bottom: 0;
+    flex: 0 0 120px;
+}
+
+.wccrm-product-info .wccrm-field-input {
+    flex: 1;
+    margin-left: 15px;
+}

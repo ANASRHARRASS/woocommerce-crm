@@ -1,0 +1,388 @@
+/**
+ * WooCommerce CRM Dynamic Forms Styles
+ * HubSpot-inspired form styling with modern design
+ */
+
+/* Form Container */
+.wccrm-dynamic-form {
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    padding: 30px;
+    margin: 20px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 500px;
+}
+
+/* Form Header */
+.wccrm-dynamic-form .form-header {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.wccrm-form-title {
+    color: #2d3748;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    line-height: 1.3;
+}
+
+/* Form Styles */
+.wccrm-form {
+    margin: 0;
+}
+
+/* Modern Style */
+.wccrm-form-modern .wccrm-field-group {
+    margin-bottom: 20px;
+}
+
+.wccrm-form-modern .wccrm-field-label {
+    display: block;
+    color: #4a5568;
+    font-weight: 500;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.wccrm-form-modern .wccrm-field-input,
+.wccrm-form-modern .wccrm-field-textarea,
+.wccrm-form-modern .wccrm-field-select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.wccrm-form-modern .wccrm-field-input:focus,
+.wccrm-form-modern .wccrm-field-textarea:focus,
+.wccrm-form-modern .wccrm-field-select:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* HubSpot Style */
+.wccrm-form-hubspot {
+    background: #f8f9fa;
+    border: none;
+    padding: 40px;
+}
+
+.wccrm-form-hubspot .wccrm-field-group {
+    margin-bottom: 24px;
+}
+
+.wccrm-form-hubspot .wccrm-field-label {
+    display: block;
+    color: #33475b;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.wccrm-form-hubspot .wccrm-field-input,
+.wccrm-form-hubspot .wccrm-field-textarea,
+.wccrm-form-hubspot .wccrm-field-select {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-size: 16px;
+    background: #ffffff;
+    transition: border-color 0.15s ease;
+    box-sizing: border-box;
+}
+
+.wccrm-form-hubspot .wccrm-field-input:focus,
+.wccrm-form-hubspot .wccrm-field-textarea:focus,
+.wccrm-form-hubspot .wccrm-field-select:focus {
+    outline: none;
+    border-color: #ff7a59;
+}
+
+/* Classic Style */
+.wccrm-form-classic .wccrm-field-group {
+    margin-bottom: 18px;
+}
+
+.wccrm-form-classic .wccrm-field-label {
+    display: block;
+    color: #333333;
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.wccrm-form-classic .wccrm-field-input,
+.wccrm-form-classic .wccrm-field-textarea,
+.wccrm-form-classic .wccrm-field-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    font-size: 14px;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.wccrm-form-classic .wccrm-field-input:focus,
+.wccrm-form-classic .wccrm-field-textarea:focus,
+.wccrm-form-classic .wccrm-field-select:focus {
+    outline: none;
+    border-color: #0073aa;
+}
+
+/* Minimal Style */
+.wccrm-form-minimal {
+    background: transparent;
+    border: none;
+    padding: 20px 0;
+}
+
+.wccrm-form-minimal .wccrm-field-group {
+    margin-bottom: 25px;
+}
+
+.wccrm-form-minimal .wccrm-field-label {
+    display: block;
+    color: #666666;
+    font-weight: 400;
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+
+.wccrm-form-minimal .wccrm-field-input,
+.wccrm-form-minimal .wccrm-field-textarea,
+.wccrm-form-minimal .wccrm-field-select {
+    width: 100%;
+    padding: 15px 0;
+    border: none;
+    border-bottom: 2px solid #e0e0e0;
+    border-radius: 0;
+    font-size: 16px;
+    background: transparent;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.wccrm-form-minimal .wccrm-field-input:focus,
+.wccrm-form-minimal .wccrm-field-textarea:focus,
+.wccrm-form-minimal .wccrm-field-select:focus {
+    outline: none;
+    border-bottom-color: #333333;
+}
+
+/* Field States */
+.wccrm-field-input.error,
+.wccrm-field-textarea.error,
+.wccrm-field-select.error {
+    border-color: #e53e3e !important;
+    box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1) !important;
+}
+
+.wccrm-field-error {
+    color: #e53e3e;
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+}
+
+/* Required Field Indicator */
+.required {
+    color: #e53e3e;
+    margin-left: 2px;
+}
+
+/* Textarea Specific */
+.wccrm-field-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Checkbox Styling */
+.wccrm-checkbox-label {
+    display: flex !important;
+    align-items: center;
+    cursor: pointer;
+    font-weight: normal !important;
+    margin: 0 !important;
+}
+
+.wccrm-field-checkbox {
+    width: auto !important;
+    margin-right: 8px !important;
+    transform: scale(1.2);
+}
+
+/* Progressive Fields Animation */
+.wccrm-progressive-field {
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: slideInField 0.3s ease forwards;
+}
+
+@keyframes slideInField {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Form Actions */
+.form-actions {
+    margin-top: 30px;
+    text-align: center;
+}
+
+/* Button Styles */
+.wccrm-btn {
+    display: inline-block;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+    box-sizing: border-box;
+}
+
+.wccrm-btn-primary {
+    background: #4299e1;
+    color: #ffffff;
+}
+
+.wccrm-btn-primary:hover {
+    background: #3182ce;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(66, 153, 225, 0.3);
+}
+
+.wccrm-btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
+}
+
+.wccrm-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* HubSpot Button Style */
+.wccrm-form-hubspot .wccrm-btn-primary {
+    background: #ff7a59;
+    padding: 16px 32px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.wccrm-form-hubspot .wccrm-btn-primary:hover {
+    background: #ff6347;
+}
+
+/* Messages */
+.wccrm-message {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.wccrm-success {
+    background: #f0fff4;
+    border: 1px solid #9ae6b4;
+    color: #22543d;
+}
+
+.wccrm-error {
+    background: #fed7d7;
+    border: 1px solid #feb2b2;
+    color: #822727;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .wccrm-dynamic-form {
+        padding: 20px;
+        margin: 10px 0;
+        border-radius: 6px;
+    }
+
+    .wccrm-form-title {
+        font-size: 20px;
+    }
+
+    .wccrm-field-input,
+    .wccrm-field-textarea,
+    .wccrm-field-select {
+        font-size: 16px;
+        /* Prevents zoom on iOS */
+    }
+
+    .wccrm-btn {
+        width: 100%;
+        padding: 16px;
+    }
+}
+
+/* Elementor Preview Specific */
+.wccrm-elementor-preview {
+    border: 2px dashed #e1e5e9;
+    position: relative;
+}
+
+.wccrm-elementor-preview::before {
+    content: "CRM Dynamic Form - Live Preview";
+    position: absolute;
+    top: -10px;
+    left: 15px;
+    background: #ffffff;
+    padding: 0 10px;
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Accessibility */
+.wccrm-field-input:focus,
+.wccrm-field-textarea:focus,
+.wccrm-field-select:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .wccrm-dynamic-form {
+        border: 2px solid #000000;
+    }
+
+    .wccrm-field-input,
+    .wccrm-field-textarea,
+    .wccrm-field-select {
+        border: 2px solid #000000;
+    }
+}
+
+/* Print styles */
+@media print {
+    .wccrm-dynamic-form {
+        box-shadow: none;
+        border: 1px solid #000000;
+    }
+}

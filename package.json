@@ -4,7 +4,18 @@
   "description": "WooCommerce CRM Plugin: leads, dynamic forms, HubSpot/Zoho sync, orders & shipping helpers.",
   "main": "woocommerce-crm-plugin.php",
   "scripts": {
+    "dev": "wp-scripts start --webpack-copy-plugin=false",
+    "build": "wp-scripts build --webpack-copy-plugin=false",
     "test": "phpunit"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^27.1.0"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.3",
+    "@tanstack/react-query": "^5.48.0"
   },
   "author": "Your Name",
   "license": "GPL-2.0-or-later",
